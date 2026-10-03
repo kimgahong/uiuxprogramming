@@ -159,6 +159,25 @@ button:active {
   transform: translateY(1px);
 }
 
+#subscribeMessage {
+  margin-top: 16px;
+  color: #5b6263;
+}
+
+#subscribeMessage.is-success {
+  color: #24556b;
+  background-color: #dcecf3;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+#subscribeButton:disabled {
+  color: #ffffff;
+  background-color: #6f7c7d;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 16px;
