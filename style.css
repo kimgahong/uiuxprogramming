@@ -181,14 +181,30 @@ button:active {
 /* 6주차: 서비스 이용 설정 */
 #interaction-practice {
   margin-top: 56px;
+  /* 넓은 화면에서 설정 카드 세 개를 가로 3열로 배치 */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+/* 섹션 제목은 3열 전체를 차지 */
+#interaction-practice h2 {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
 }
 
 .interaction-item {
-  margin-top: 20px;
+  margin-top: 0;
   padding: 24px;
   border: 1px solid #d3d9d7;
   border-radius: 12px;
   background-color: #ffffff;
+}
+
+/* 카드 위쪽 제목 높이를 세 카드에서 맞춤 */
+.interaction-item h3 {
+  margin-top: 0;
 }
 
 .interaction-item label:not(.agree-row) {
@@ -356,6 +372,7 @@ body.dark #agreeMessage.is-ready {
   /* 6주차: 설정 영역과 탭 */
   #interaction-practice {
     margin-top: 40px;
+    grid-template-columns: 1fr;
   }
 
   .interaction-item {
