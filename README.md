@@ -67,6 +67,7 @@
 - 탭 색상은 기존 페이지의 초록색(`#277a68`)에 맞췄다.
 - 메뉴에 `러닝 설정` 링크(`#interaction-practice`)를 추가했다.
 - 설정 카드 세 개는 넓은 화면에서 `display: grid`와 `grid-template-columns: repeat(3, minmax(0, 1fr))`로 가로 3열로 배치하고, 섹션 제목 `h2`는 `grid-column: 1 / -1`로 한 줄 전체를 쓰게 했다. 768px 이하에서는 1열로 바뀐다.
+- 처음에 `align-items: start`를 써서 카드마다 내용 높이가 달랐다. `align-items: stretch`로 바꿔 세 카드의 높이를 가장 긴 카드에 맞췄다.
 - 어두운 테마에서 제목, 탭 패널, 이메일 카드, 안내 문구도 배경과 구분되도록 색을 지정했다.
 - 768px 이하에서 기존 `input { width: 100% }` 규칙 때문에 체크박스가 가로로 늘어나서 `.agree-row input { width: auto; }`를 추가했다.
 
