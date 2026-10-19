@@ -39,3 +39,43 @@
 - 이메일이 있으면 `isSubscribed`를 `true`로 바꾸고 `submitCount`를 1 올린 뒤, `makeSubscribeMessage(subscriberEmail, isSubscribed)` 결과를 `#subscribeMessage`에 넣는다.
 - 완료 스타일은 `subscribeMessage.classList.add("is-success")`로 붙이고, 모양은 `style.css`의 `#subscribeMessage.is-success`가 담당한다.
 - 버튼 글자와 비활성 상태는 `subscribeButton.textContent`, `subscribeButton.disabled`로 바꾸고 비활성 모양은 `style.css`의 `#subscribeButton:disabled`가 담당한다.
+
+## 6주차 이벤트와 동적 UI
+
+### 구현한 이벤트
+
+| 이벤트 | 요소 | 사용자 행동 | 화면 변화 |
+| --- | --- | --- | --- |
+| `click` | `#themeButton` | 테마 버튼을 누른다. | `body`에 `dark` 클래스가 붙거나 빠지고, 버튼 문구가 `어두운 테마로 바꾸기` ↔ `밝은 테마로 바꾸기`로 바뀐다. |
+| `input` | `#userName` | 러너 닉네임을 입력하거나 지운다. | `#userNameCount`가 `0 / 10` 형식으로 현재 글자 수를 즉시 보여 준다. `maxlength="10"`으로 10자를 넘지 않는다. |
+| `change` | `#agreeCheck` | 준비운동·안전 안내 체크박스를 선택하거나 해제한다. | `#agreeMessage` 문구와 `is-ready` 클래스, `#startButton`의 `disabled`가 함께 바뀐다. 체크해야 `러닝 시작하기` 버튼을 누를 수 있다. |
+| `click` | `.tab` (3개) | 러닝 기능 탭을 누른다. | 선택한 탭에 `is-active`와 `aria-selected="true"`가 붙고, `data-target`으로 연결된 패널 하나만 보인다. |
+
+### 탭 구성
+
+기존 `러닝 기능` 카드 세 개의 내용을 그대로 세 개의 탭으로 옮겼다.
+
+- `맞춤형 러닝 계획` → `#panel-plan`
+- `단계별 러닝 훈련` → `#panel-training`
+- `러닝 피드백` → `#panel-feedback`
+
+탭을 누르면 `resetTabsAndPanels()`로 모든 탭과 패널의 선택 상태를 해제한 뒤, `activateTab()`이 누른 탭의 `dataset.target`으로 패널을 찾아 활성화한다.
+
+### 서비스에 맞게 바꾼 부분
+
+- 설정 섹션 제목은 `러닝 코치 이용 설정`, 이름 입력은 `러너 닉네임`, 확인 항목은 `러닝 전 준비운동과 안전 안내`, 시작 버튼은 `러닝 시작하기`로 바꿨다.
+- 탭 색상은 기존 페이지의 초록색(`#277a68`)에 맞췄다.
+- 메뉴에 `러닝 설정` 링크(`#interaction-practice`)를 추가했다.
+- 어두운 테마에서 제목, 탭 패널, 이메일 카드, 안내 문구도 배경과 구분되도록 색을 지정했다.
+- 768px 이하에서 기존 `input { width: 100% }` 규칙 때문에 체크박스가 가로로 늘어나서 `.agree-row input { width: auto; }`를 추가했다.
+
+### 테스트 결과
+
+1100px / 768px / 390px에서 확인했다.
+
+- 세 탭을 차례로 눌러도 선택된 탭과 보이는 패널이 항상 하나씩이다.
+- 닉네임을 입력하면 글자 수가 즉시 바뀐다. (`runner` 입력 시 `6 / 10`)
+- 체크 전에는 시작 버튼이 비활성화되어 있고, 체크하면 활성화되며 안내 문구가 바뀐다.
+- 테마 버튼을 누르면 화면 색과 버튼 문구가 함께 바뀐다.
+- 768px 이하에서 탭이 세로로 배치되고, 가로 스크롤이 생기지 않는다.
+- Console 오류가 없다.

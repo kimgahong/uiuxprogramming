@@ -178,6 +178,131 @@ button:active {
   cursor: not-allowed;
 }
 
+/* 6주차: 서비스 이용 설정 */
+#interaction-practice {
+  margin-top: 56px;
+}
+
+.interaction-item {
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid #d3d9d7;
+  border-radius: 12px;
+  background-color: #ffffff;
+}
+
+.interaction-item label:not(.agree-row) {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.interaction-item input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.agree-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.agree-row input {
+  flex: 0 0 auto;
+  margin-top: 6px;
+}
+
+#agreeMessage {
+  padding: 12px;
+  border-radius: 10px;
+  background-color: #eaf0ed;
+}
+
+#agreeMessage.is-ready {
+  color: #245c3a;
+  background-color: #e7f7ed;
+  font-weight: 700;
+}
+
+#startButton:disabled {
+  color: #ffffff;
+  background-color: #a8a8b2;
+  cursor: not-allowed;
+}
+
+/* 6주차: 어두운 테마 */
+body.dark {
+  color: #f4f4f8;
+  background-color: #20212a;
+}
+
+body.dark p,
+body.dark nav a {
+  color: #d8d8e2;
+}
+
+body.dark h2 {
+  color: #7fcfb9;
+}
+
+body.dark .feature-card,
+body.dark .settings-panel,
+body.dark .interaction-item,
+body.dark .subscribe-card,
+body.dark .panel {
+  border-color: #50515f;
+  background-color: #2d2e38;
+}
+
+body.dark #agreeMessage {
+  color: #d8d8e2;
+  background-color: #3a3b47;
+}
+
+body.dark #agreeMessage.is-ready {
+  color: #245c3a;
+  background-color: #e7f7ed;
+}
+
+/* 6주차: 탭 UI */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab {
+  color: #5b6263;
+  background-color: #ffffff;
+  border: 1px solid #d3d9d7;
+}
+
+.tab:hover {
+  color: #ffffff;
+  background-color: #1f6255;
+}
+
+.tab.is-active {
+  color: #277a68;
+  background-color: #ffffff;
+  border-color: #277a68;
+  border-bottom: 4px solid currentColor;
+  font-weight: 700;
+}
+
+.panel {
+  padding: 24px;
+  border: 1px solid #d3d9d7;
+  border-radius: 12px;
+  background-color: #eaf0ed;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 16px;
@@ -226,5 +351,34 @@ button:active {
 
   button {
     min-height: 48px;
+  }
+
+  /* 6주차: 설정 영역과 탭 */
+  #interaction-practice {
+    margin-top: 40px;
+  }
+
+  .interaction-item {
+    padding: 20px;
+  }
+
+  .interaction-item input[type="text"],
+  .interaction-item button {
+    width: 100%;
+  }
+
+  /* 체크박스는 위의 input 100% 규칙에서 제외 */
+  .agree-row input {
+    width: auto;
+  }
+
+  .tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tab {
+    width: 100%;
+    text-align: left;
   }
 }
