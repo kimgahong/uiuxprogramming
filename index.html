@@ -29,6 +29,7 @@
       <nav aria-label="주요 메뉴">
         <a href="#about">서비스 소개</a>
         <a href="#features">러닝 기능</a>
+        <a href="#interaction-practice">러닝 설정</a>
         <a href="#steps">이용 방법</a>
         <a href="#subscribe">러닝 소식 받기</a>
       </nav>
@@ -58,31 +59,115 @@
       <section id="features">
         <h2>러닝 기능</h2>
 
-        <ul class="features-list">
-          <li class="feature-card">
-            <h3>맞춤형 러닝 계획</h3>
-            <p>
-              러닝 목표와 현재 운동 수준을 선택하면 나에게 맞는 훈련 계획을
-              확인할 수 있습니다.
-            </p>
-          </li>
+        <div class="tabs" role="tablist" aria-label="러닝 기능 선택">
+          <button
+            id="tab-plan"
+            class="tab is-active"
+            type="button"
+            role="tab"
+            aria-selected="true"
+            aria-controls="panel-plan"
+            data-target="#panel-plan"
+          >
+            맞춤형 러닝 계획
+          </button>
 
-          <li class="feature-card">
-            <h3>단계별 러닝 훈련</h3>
-            <p>
-              무리하지 않고 목표를 달성할 수 있도록 단계별 러닝 훈련을
-              진행합니다.
-            </p>
-          </li>
+          <button
+            id="tab-training"
+            class="tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-training"
+            data-target="#panel-training"
+          >
+            단계별 러닝 훈련
+          </button>
 
-          <li class="feature-card">
-            <h3>러닝 피드백</h3>
-            <p>
-              러닝 후 운동 결과를 확인하고 다음 훈련에 반영할 개선점을
-              확인합니다.
-            </p>
-          </li>
-        </ul>
+          <button
+            id="tab-feedback"
+            class="tab"
+            type="button"
+            role="tab"
+            aria-selected="false"
+            aria-controls="panel-feedback"
+            data-target="#panel-feedback"
+          >
+            러닝 피드백
+          </button>
+        </div>
+
+        <div
+          id="panel-plan"
+          class="panel is-active"
+          role="tabpanel"
+          aria-labelledby="tab-plan"
+        >
+          <h3>맞춤형 러닝 계획</h3>
+          <p>
+            러닝 목표와 현재 운동 수준을 선택하면 나에게 맞는 훈련 계획을 확인할
+            수 있습니다.
+          </p>
+        </div>
+
+        <div
+          id="panel-training"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-training"
+          hidden
+        >
+          <h3>단계별 러닝 훈련</h3>
+          <p>
+            무리하지 않고 목표를 달성할 수 있도록 단계별 러닝 훈련을 진행합니다.
+          </p>
+        </div>
+
+        <div
+          id="panel-feedback"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-feedback"
+          hidden
+        >
+          <h3>러닝 피드백</h3>
+          <p>
+            러닝 후 운동 결과를 확인하고 다음 훈련에 반영할 개선점을 확인합니다.
+          </p>
+        </div>
+      </section>
+
+      <section id="interaction-practice" class="settings-panel">
+        <h2>러닝 코치 이용 설정</h2>
+
+        <div class="interaction-item">
+          <h3>화면 테마</h3>
+          <button id="themeButton" type="button">어두운 테마로 바꾸기</button>
+        </div>
+
+        <div class="interaction-item">
+          <label for="userName">러너 닉네임</label>
+          <input
+            id="userName"
+            type="text"
+            maxlength="10"
+            placeholder="10자 이내로 입력"
+          />
+          <p id="userNameCount" aria-live="polite">0 / 10</p>
+        </div>
+
+        <div class="interaction-item">
+          <label class="agree-row" for="agreeCheck">
+            <input id="agreeCheck" type="checkbox" />
+            러닝 전 준비운동과 안전 안내를 확인했습니다.
+          </label>
+
+          <p id="agreeMessage" aria-live="polite">
+            안내 확인 후 러닝을 시작할 수 있습니다.
+          </p>
+
+          <button id="startButton" type="button" disabled>러닝 시작하기</button>
+        </div>
       </section>
 
       <section id="steps">
