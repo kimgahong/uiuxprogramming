@@ -57,8 +57,13 @@ function handleThemeClick() {
     : "어두운 테마로 바꾸기";
 }
 
-function handleUserNameInput() {
-  const currentLength = userNameInput.value.length;
+function handleUserNameInput(event) {
+  // 한글 조합 중에는 maxlength를 넘는 글자가 잠깐 들어올 수 있어 조합이 끝난 뒤 10자로 자름
+  if (!event.isComposing && userNameInput.value.length > 10) {
+    userNameInput.value = userNameInput.value.slice(0, 10);
+  }
+
+  const currentLength = Math.min(userNameInput.value.length, 10);
   userNameCount.textContent = currentLength + " / 10";
 }
 
@@ -75,6 +80,7 @@ function handleAgreeChange() {
 
 themeButton.addEventListener("click", handleThemeClick);
 userNameInput.addEventListener("input", handleUserNameInput);
+userNameInput.addEventListener("compositionend", handleUserNameInput);
 agreeCheck.addEventListener("change", handleAgreeChange);
 
 // 6주차: 러닝 기능 탭

@@ -264,7 +264,6 @@ body.dark h2 {
 }
 
 body.dark .feature-card,
-body.dark .settings-panel,
 body.dark .interaction-item,
 body.dark .subscribe-card,
 body.dark .panel {
@@ -278,8 +277,56 @@ body.dark #agreeMessage {
 }
 
 body.dark #agreeMessage.is-ready {
-  color: #245c3a;
-  background-color: #e7f7ed;
+  color: #a6e3bd;
+  background-color: #1f3d2c;
+}
+
+/* 어두운 테마: 체크박스 등 기본 입력 요소도 어둡게 표시 */
+body.dark {
+  color-scheme: dark;
+}
+
+body.dark input[type="text"],
+body.dark input[type="email"] {
+  color: #f4f4f8;
+  background-color: #20212a;
+  border-color: #50515f;
+}
+
+body.dark input::placeholder {
+  color: #8d8e9c;
+}
+
+body.dark .tab {
+  color: #d8d8e2;
+  background-color: #2d2e38;
+  border-color: #50515f;
+}
+
+body.dark .tab:hover {
+  color: #ffffff;
+  background-color: #1f6255;
+}
+
+body.dark .tab.is-active {
+  color: #7fcfb9;
+  background-color: #2d2e38;
+  border-color: #7fcfb9;
+}
+
+body.dark #subscribeMessage {
+  color: #d8d8e2;
+}
+
+body.dark #subscribeMessage.is-success {
+  color: #a6d8ec;
+  background-color: #1e3a47;
+}
+
+body.dark #startButton:disabled,
+body.dark #subscribeButton:disabled {
+  color: #b8b8c4;
+  background-color: #50515f;
 }
 
 /* 6주차: 탭 UI */
