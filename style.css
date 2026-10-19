@@ -185,7 +185,8 @@ button:active {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  align-items: start;
+  /* 같은 줄의 카드 높이를 가장 긴 카드에 맞춤 */
+  align-items: stretch;
 }
 
 /* 섹션 제목은 3열 전체를 차지 */
