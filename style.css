@@ -99,6 +99,9 @@ body {
   font-family: "Noto Sans KR", sans-serif;
   font-size: 17px;
   line-height: 1.65;
+  /* 한국어 낱말 중간에서 줄이 바뀌지 않게 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
   background: linear-gradient(180deg, var(--color-bg-tint) 0, var(--color-bg) 480px)
     no-repeat var(--color-bg);
 }
@@ -176,6 +179,27 @@ h4 {
 
 p {
   color: var(--color-text-muted);
+}
+
+/* 줄바꿈 규칙: 짧은 글은 줄 길이를 고르게, 긴 글은 마지막 줄에 한두 글자만 남지 않게 */
+h1,
+h2,
+h3,
+h4,
+label,
+legend,
+small,
+button,
+.player-status,
+.notice-message,
+.suggestion-message,
+#agreeMessage {
+  text-wrap: balance;
+}
+
+p,
+li {
+  text-wrap: pretty;
 }
 
 header p {
@@ -798,10 +822,11 @@ form label {
   list-style: none;
 }
 
+/* 1줄: 구간 이름 + 시간, 2줄: 상태(진행 중·완료·건너뜀) */
 .timeline-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
   padding: 8px 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -831,8 +856,18 @@ form label {
 }
 
 .timeline-time {
-  flex: 0 0 auto;
   color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.timeline-state {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.timeline-state:empty {
+  display: none;
 }
 
 /* 준비 화면 옵션 */
@@ -1077,6 +1112,17 @@ form label {
 }
 
 /* ===== 반응형 ===== */
+/* 태블릿: 설정 카드 세 개가 좁아져 문장이 잘게 끊기지 않도록 안전 확인 카드를 한 줄 전체로 넓힌다 */
+@media (max-width: 1000px) {
+  #interaction-practice {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #interaction-practice .interaction-item:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 16px;
@@ -1156,6 +1202,20 @@ form label {
 
   #stop-run-dialog .dialog-actions {
     flex-direction: column;
+  }
+
+  /* 진행 단계 4칸이 한 줄에 들어가도록 같은 너비로 */
+  .running-flow .progress {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .running-flow .progress_item {
+    padding: 4px 0;
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
   }
 
   .player-controls {
