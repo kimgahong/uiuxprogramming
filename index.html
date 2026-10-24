@@ -16,7 +16,7 @@
 
   <body>
     <header>
-      <h1>맞춤형 러닝 코치</h1>
+      <h1>맞춤형 <span class="accent-run">러닝</span> 코치</h1>
       <p>나에게 맞는 러닝 계획으로 꾸준히 달리고 목표를 달성해보세요.</p>
 
       <nav aria-label="주요 메뉴">
@@ -189,7 +189,13 @@
         </p>
 
         <div class="dialog-actions">
-          <button id="running-guide-cancel" type="button">돌아가기</button>
+          <button
+            id="running-guide-cancel"
+            class="button-secondary"
+            type="button"
+          >
+            돌아가기
+          </button>
           <button id="running-guide-confirm" type="button">
             확인하고 설정 시작하기
           </button>
@@ -200,12 +206,13 @@
         <h2>러닝 세션 설정</h2>
 
         <p class="progress" aria-label="설정 진행 단계">
-          <span class="progress_item">1 · 정보</span>
-          <span class="progress_item">2 · 조건</span>
-          <span class="progress_item">3 · 확인</span>
+          <span class="progress_item" data-progress="1">1 · 정보</span>
+          <span class="progress_item" data-progress="2">2 · 조건</span>
+          <span class="progress_item" data-progress="3">3 · 확인</span>
+          <span class="progress_item" data-progress="4">4 · 러닝</span>
         </p>
 
-        <section class="step" data-step="1" hidden>
+        <section class="step" data-step="1" data-progress="1" hidden>
           <h3>러닝 세션 이름을 입력해주세요</h3>
 
           <label for="session-title">세션 이름</label>
@@ -227,7 +234,7 @@
           </button>
         </section>
 
-        <section class="step" data-step="2" hidden>
+        <section class="step" data-step="2" data-progress="2" hidden>
           <h3>러닝 조건을 선택해주세요.</h3>
 
           <label for="running-duration-range">러닝 시간</label>
@@ -271,14 +278,20 @@
           </fieldset>
 
           <div class="step-actions">
-            <button id="session-option-prev" type="button">이전</button>
+            <button
+              id="session-option-prev"
+              class="button-secondary"
+              type="button"
+            >
+              이전
+            </button>
             <button id="session-option-next" type="button">
               내용 확인하기
             </button>
           </div>
         </section>
 
-        <section class="step" data-step="3" hidden>
+        <section class="step" data-step="3" data-progress="3" hidden>
           <h3>입력한 러닝 설정을 확인해주세요.</h3>
 
           <div class="summary-list">
@@ -299,7 +312,13 @@
           </div>
 
           <div class="step-actions">
-            <button id="session-summary-prev" type="button">수정하기</button>
+            <button
+              id="session-summary-prev"
+              class="button-secondary"
+              type="button"
+            >
+              수정하기
+            </button>
             <button id="session-finish-button" type="button">
               설정 완료하기
             </button>
@@ -309,13 +328,210 @@
         <section class="step complete-step" data-step="4" hidden>
           <h3>러닝 세션 설정이 완료되었습니다.</h3>
           <p>
-            설정한 러닝 조건을 확인했습니다. 필요하면 다시 설정할 수 있습니다.
+            설정한 러닝 조건을 확인했습니다. 이 설정으로 바로 러닝을 시작하거나
+            처음부터 다시 설정할 수 있습니다.
           </p>
-          <button id="session-restart-button" type="button">
-            다시 설정하기
-          </button>
+          <div class="step-actions">
+            <button
+              id="session-restart-button"
+              class="button-secondary"
+              type="button"
+            >
+              다시 설정하기
+            </button>
+            <button id="player-open-button" type="button">
+              이 설정으로 러닝 시작하기
+            </button>
+          </div>
+        </section>
+
+        <!-- 중간고사: 인터벌 러닝 세션 플레이어 -->
+        <section class="step player-step" data-step="5" data-progress="4" hidden>
+          <h3>
+            <span id="ready-session-title"></span> 러닝을 준비해주세요.
+          </h3>
+
+          <div class="summary-list">
+            <div>
+              <span>총 운동 시간</span>
+              <strong id="ready-total-time"></strong>
+            </div>
+            <div>
+              <span>걷기 휴식</span>
+              <strong id="ready-break-count"></strong>
+            </div>
+            <div>
+              <span>전체 구간</span>
+              <strong id="ready-segment-count"></strong>
+            </div>
+          </div>
+
+          <p id="ready-adjust-message" class="notice-message" hidden></p>
+
+          <h4 class="player-subtitle">자동으로 만든 구간</h4>
+          <div class="timeline" id="ready-timeline"></div>
+
+          <fieldset class="player-options">
+            <legend>러닝 중 안내 방법</legend>
+
+            <label class="option-row" for="voice-option">
+              <input id="voice-option" type="checkbox" />
+              <span>
+                <strong>음성 안내</strong>
+                <small id="voice-option-help">
+                  구간이 바뀔 때 소리로 알려드려요.
+                </small>
+              </span>
+            </label>
+
+            <label class="option-row" for="vibrate-option">
+              <input id="vibrate-option" type="checkbox" />
+              <span>
+                <strong>진동</strong>
+                <small id="vibrate-option-help">
+                  구간이 바뀔 때 휴대폰을 진동해요.
+                </small>
+              </span>
+            </label>
+
+            <label class="option-row speed-row" for="speed-option">
+              <span>
+                <strong>시연 배속</strong>
+                <small>발표·테스트할 때 세션을 빠르게 진행해요.</small>
+              </span>
+              <select id="speed-option">
+                <option value="1" selected>1배 (실제 시간)</option>
+                <option value="10">10배</option>
+                <option value="60">60배</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <div class="step-actions">
+            <button id="player-ready-prev" class="button-secondary" type="button">
+              이전
+            </button>
+            <button id="player-start-button" type="button">러닝 시작</button>
+          </div>
+        </section>
+
+        <section class="step player-step" data-step="6" data-progress="4" hidden>
+          <div id="player-stage" class="player-stage" data-kind="ready">
+            <p id="player-segment-label" class="segment-label">곧 시작해요</p>
+
+            <div id="player-ring" class="player-ring">
+              <p class="ring-content">
+                <span
+                  id="player-remaining"
+                  class="remaining-time"
+                  role="timer"
+                  aria-live="off"
+                  >3</span
+                >
+                <span id="player-remaining-caption" class="ring-caption"
+                  >초 후 시작</span
+                >
+              </p>
+            </div>
+
+            <p id="player-next" class="next-segment"></p>
+          </div>
+
+          <p id="player-status" class="player-status" aria-live="polite"></p>
+
+          <div class="overall-progress">
+            <div class="overall-progress-text">
+              <span>전체 진행률</span>
+              <strong id="player-overall-text">0%</strong>
+            </div>
+            <div class="overall-bar" aria-hidden="true">
+              <span id="player-overall-bar"></span>
+            </div>
+          </div>
+
+          <div class="timeline" id="run-timeline"></div>
+
+          <div class="player-controls">
+            <button id="player-countdown-cancel" class="button-secondary" type="button">
+              시작 취소
+            </button>
+            <button id="player-pause-button" type="button">일시정지</button>
+            <button id="player-resume-button" type="button" hidden>계속</button>
+            <button id="player-skip-button" class="button-secondary" type="button">
+              다음 구간으로
+            </button>
+            <button id="player-stop-button" class="button-danger" type="button">
+              그만두기
+            </button>
+          </div>
+        </section>
+
+        <section class="step player-step" data-step="7" data-progress="4" hidden>
+          <div id="result-card" class="result-card">
+            <p id="result-badge" class="result-badge"></p>
+            <h3 id="result-title"></h3>
+            <p id="result-description"></p>
+
+            <div id="result-stats" class="summary-list">
+              <div>
+                <span>세션 이름</span>
+                <strong id="result-session-title"></strong>
+              </div>
+              <div>
+                <span>세션 진행 시간</span>
+                <strong id="result-elapsed"></strong>
+              </div>
+              <div>
+                <span>달리기 진행 시간</span>
+                <strong id="result-run-elapsed"></strong>
+              </div>
+              <div>
+                <span>완료한 구간</span>
+                <strong id="result-completed"></strong>
+              </div>
+              <div>
+                <span>건너뛴 구간</span>
+                <strong id="result-skipped"></strong>
+              </div>
+              <div>
+                <span>달성률 (구간 기준)</span>
+                <strong id="result-rate"></strong>
+              </div>
+            </div>
+
+            <p id="result-speed-note" class="result-note" hidden></p>
+            <p id="result-suggestion" class="suggestion-message"></p>
+          </div>
+
+          <div class="step-actions">
+            <button id="player-new-session" class="button-secondary" type="button">
+              새 세션 설정하기
+            </button>
+            <button id="player-again-button" type="button">
+              같은 설정으로 다시 달리기
+            </button>
+          </div>
         </section>
       </section>
+
+      <dialog
+        id="stop-run-dialog"
+        aria-labelledby="stop-run-title"
+        aria-describedby="stop-run-description"
+      >
+        <h2 id="stop-run-title">러닝을 그만둘까요?</h2>
+        <p id="stop-run-description">
+          지금 그만두면 이 세션이 종료되고 여기까지의 결과만 기록돼요. 타이머는
+          잠시 멈춰 있어요.
+        </p>
+
+        <div class="dialog-actions">
+          <button id="stop-run-continue" type="button">계속하기</button>
+          <button id="stop-run-confirm" class="button-danger" type="button">
+            그만두기
+          </button>
+        </div>
+      </dialog>
 
       <section id="subscribe" class="subscribe-card">
         <h2>러닝 소식 받기</h2>
