@@ -10,14 +10,17 @@ body {
 header,
 main,
 footer {
-  /*좁은 화면에서는 사용 가능한 너비에 맞춰 줄어듭니다.*/
   width: 100%;
-
-  /*넓은 화면에서도 콘텐츠는 1100px보다 커지지 않음*/
   max-width: 1100px;
   margin: 0 auto;
   padding-left: 24px;
   padding-right: 24px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 img {
@@ -45,7 +48,6 @@ footer {
 
 nav {
   display: flex;
-  /*메뉴가 들어갈 자리가 부족하면 다음 줄로 이동*/
   flex-wrap: wrap;
   gap: 24px;
   margin-top: 24px;
@@ -82,54 +84,8 @@ p {
   line-height: 1.7;
 }
 
-.features-list {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-}
-
-.feature-card {
-  min-width: 0;
-  padding: 20px 24px;
-  margin-bottom: 0px;
-  border: 1px solid #d3d9d7;
-  border-radius: 12px;
-  background-color: #eaf0ed;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-.subscribe-card {
-  padding: 24px;
-  margin-top: 32px;
-  background-color: #eaf0ed;
-  border: 1px solid #d3d9d7;
-  border-radius: 12px;
-}
-
-form {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
+button,
 input {
-  flex: 1;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid #aeb9bb;
-  border-radius: 10px;
-}
-
-input,
-button {
   font: inherit;
 }
 
@@ -159,8 +115,55 @@ button:active {
   transform: translateY(1px);
 }
 
+button:disabled {
+  color: #ffffff;
+  background-color: #6f7c7d;
+  cursor: not-allowed;
+}
+
+.features-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.feature-card {
+  min-width: 0;
+  padding: 20px 24px;
+  margin-bottom: 0;
+  border: 1px solid #d3d9d7;
+  border-radius: 12px;
+  background-color: #eaf0ed;
+}
+
+.subscribe-card {
+  padding: 24px;
+  margin-top: 32px;
+  background-color: #eaf0ed;
+  border: 1px solid #d3d9d7;
+  border-radius: 12px;
+}
+
+form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #aeb9bb;
+  border-radius: 10px;
+}
+
 #subscribeMessage {
   margin-top: 16px;
+  padding: 0;
   color: #5b6263;
 }
 
@@ -178,18 +181,15 @@ button:active {
   cursor: not-allowed;
 }
 
-/* 6주차: 서비스 이용 설정 */
+/* 러닝 설정 영역 */
 #interaction-practice {
   margin-top: 56px;
-  /* 넓은 화면에서 설정 카드 세 개를 가로 3열로 배치 */
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
-  /* 같은 줄의 카드 높이를 가장 긴 카드에 맞춤 */
   align-items: stretch;
 }
 
-/* 섹션 제목은 3열 전체를 차지 */
 #interaction-practice h2 {
   grid-column: 1 / -1;
   margin-bottom: 0;
@@ -203,7 +203,6 @@ button:active {
   background-color: #ffffff;
 }
 
-/* 카드 위쪽 제목 높이를 세 카드에서 맞춤 */
 .interaction-item h3 {
   margin-top: 0;
 }
@@ -244,14 +243,15 @@ button:active {
 
 #startButton:disabled {
   color: #ffffff;
-  background-color: #a8a8b2;
+  background-color: #6f7c7d;
   cursor: not-allowed;
 }
 
-/* 6주차: 어두운 테마 */
+/* 다크 테마 */
 body.dark {
   color: #f4f4f8;
   background-color: #20212a;
+  color-scheme: dark;
 }
 
 body.dark p,
@@ -279,11 +279,6 @@ body.dark #agreeMessage {
 body.dark #agreeMessage.is-ready {
   color: #a6e3bd;
   background-color: #1f3d2c;
-}
-
-/* 어두운 테마: 체크박스 등 기본 입력 요소도 어둡게 표시 */
-body.dark {
-  color-scheme: dark;
 }
 
 body.dark input[type="text"],
@@ -329,7 +324,7 @@ body.dark #subscribeButton:disabled {
   background-color: #50515f;
 }
 
-/* 6주차: 탭 UI */
+/* 기능 탭 */
 .tabs {
   display: flex;
   flex-wrap: wrap;
@@ -367,6 +362,154 @@ body.dark #subscribeButton:disabled {
   display: none;
 }
 
+/* 러닝 안전 안내 다이얼로그 */
+#running-guide-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-width: none;
+  padding: 24px;
+  border: 1px solid #d3d9d7;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #293033;
+}
+
+#running-guide-dialog::backdrop {
+  background: rgba(30, 40, 39, 0.6);
+}
+
+#running-guide-dialog .dialog-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+#running-guide-dialog button {
+  min-height: 44px;
+}
+
+body.dark #running-guide-dialog {
+  background: #50515f;
+  color: #ffffff;
+}
+
+/* 러닝 세션 설정 */
+.running-flow {
+  padding: 24px;
+  border: 1px solid #d3d9d7;
+  border-radius: 24px;
+  background-color: #ffffff;
+}
+
+.running-flow[hidden],
+.running-flow .step[hidden],
+.running-flow fieldset[hidden] {
+  display: none;
+}
+
+.running-flow .progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.running-flow .progress_item.is-active {
+  color: #277a68;
+  font-weight: 800;
+}
+
+.running-flow .error-message {
+  min-height: 24px;
+  color: #9d243d;
+  font-weight: 700;
+}
+
+.running-flow #session-title.has-error {
+  border-color: #9d243d;
+}
+
+.running-flow label[for="running-duration-range"] {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.running-flow #running-duration-range {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  accent-color: #277a68;
+}
+
+.running-flow .duration-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.running-flow .break-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.running-flow #break-options {
+  margin-top: 12px;
+  padding: 8px 12px 12px;
+  border: 1px solid #aeb9bb;
+  border-radius: 10px;
+}
+
+.running-flow #break-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 16px;
+}
+
+.running-flow input[type="checkbox"],
+.running-flow input[type="radio"] {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  accent-color: #277a68;
+}
+
+.running-flow .summary-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #d3d9d7;
+}
+
+.running-flow .step-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+body.dark .running-flow {
+  background-color: #50515f;
+  border-color: #2d2e38;
+}
+
+body.dark .running-flow .progress_item.is-active {
+  color: #7fcfb9;
+}
+
+body.dark .running-flow #break-options {
+  border-color: #8d8e9c;
+}
+
+/* 반응형 */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
@@ -417,7 +560,6 @@ body.dark #subscribeButton:disabled {
     min-height: 48px;
   }
 
-  /* 6주차: 설정 영역과 탭 */
   #interaction-practice {
     margin-top: 40px;
     grid-template-columns: 1fr;
@@ -432,7 +574,6 @@ body.dark #subscribeButton:disabled {
     width: 100%;
   }
 
-  /* 체크박스는 위의 input 100% 규칙에서 제외 */
   .agree-row input {
     width: auto;
   }
@@ -445,5 +586,30 @@ body.dark #subscribeButton:disabled {
   .tab {
     width: 100%;
     text-align: left;
+  }
+
+  .running-flow {
+    padding: 20px;
+  }
+
+  #running-guide-dialog .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  #running-guide-dialog .dialog-actions button {
+    width: 100%;
+  }
+
+  .running-flow .step-actions {
+    flex-direction: column-reverse;
+  }
+
+  .running-flow .step-actions button {
+    width: 100%;
+  }
+
+  .running-flow input[type="checkbox"],
+  .running-flow input[type="radio"] {
+    width: auto;
   }
 }
