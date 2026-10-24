@@ -15,13 +15,6 @@
   </head>
 
   <body>
-    <!--
-      사용자: 러닝을 처음 시작하거나 꾸준히 달리고 싶은 사람
-      목적: 러닝 목표에 맞는 훈련 계획을 세우고 꾸준한 러닝 습관 만들기
-      핵심 행동: 러닝 목표와 훈련 세션 설정하기
-      정보 순서: 소개→기능→방법→러닝 세션 설정
-    -->
-
     <header>
       <h1>맞춤형 러닝 코치</h1>
       <p>나에게 맞는 러닝 계획으로 꾸준히 달리고 목표를 달성해보세요.</p>
@@ -137,6 +130,18 @@
         </div>
       </section>
 
+      <section id="steps">
+        <h2>이용 방법</h2>
+
+        <ol>
+          <li>회원가입 및 로그인</li>
+          <li>원하는 러닝 목표를 선택합니다.</li>
+          <li>현재 러닝 수준과 운동 가능 시간을 설정합니다.</li>
+          <li>나에게 맞는 단계별 러닝 훈련을 시작합니다.</li>
+          <li>러닝 결과와 피드백을 확인하고 다음 훈련을 준비합니다.</li>
+        </ol>
+      </section>
+
       <section id="interaction-practice" class="settings-panel">
         <h2>러닝 코치 이용 설정</h2>
 
@@ -166,20 +171,150 @@
             안내 확인 후 러닝을 시작할 수 있습니다.
           </p>
 
-          <button id="startButton" type="button" disabled>러닝 시작하기</button>
+          <button id="startButton" type="button" disabled>
+            러닝 설정 시작하기
+          </button>
         </div>
       </section>
 
-      <section id="steps">
-        <h2>이용 방법</h2>
+      <dialog
+        id="running-guide-dialog"
+        aria-labelledby="running-guide-title"
+        aria-describedby="running-guide-description"
+      >
+        <h2 id="running-guide-title">러닝 안전 안내</h2>
+        <p id="running-guide-description">
+          러닝을 시작하기 전에 준비운동과 안전 수칙을 확인해주세요. 지금은 러닝
+          세션 조건만 설정하며 실제 운동이 시작되지는 않습니다.
+        </p>
 
-        <ol>
-          <li>회원가입 및 로그인</li>
-          <li>원하는 러닝 목표를 선택합니다.</li>
-          <li>현재 러닝 수준과 운동 가능 시간을 설정합니다.</li>
-          <li>나에게 맞는 단계별 러닝 훈련을 시작합니다.</li>
-          <li>러닝 결과와 피드백을 확인하고 다음 훈련을 준비합니다.</li>
-        </ol>
+        <div class="dialog-actions">
+          <button id="running-guide-cancel" type="button">돌아가기</button>
+          <button id="running-guide-confirm" type="button">
+            확인하고 설정 시작하기
+          </button>
+        </div>
+      </dialog>
+
+      <section id="running-flow" class="running-flow" hidden>
+        <h2>러닝 세션 설정</h2>
+
+        <p class="progress" aria-label="설정 진행 단계">
+          <span class="progress_item">1 · 정보</span>
+          <span class="progress_item">2 · 조건</span>
+          <span class="progress_item">3 · 확인</span>
+        </p>
+
+        <section class="step" data-step="1" hidden>
+          <h3>러닝 세션 이름을 입력해주세요</h3>
+
+          <label for="session-title">세션 이름</label>
+          <input
+            id="session-title"
+            type="text"
+            placeholder="예: 첫 3km 러닝"
+            aria-describedby="session-title-error"
+          />
+
+          <p
+            id="session-title-error"
+            class="error-message"
+            aria-live="polite"
+          ></p>
+
+          <button id="session-title-next" type="button">
+            러닝 조건 선택하기
+          </button>
+        </section>
+
+        <section class="step" data-step="2" hidden>
+          <h3>러닝 조건을 선택해주세요.</h3>
+
+          <label for="running-duration-range">러닝 시간</label>
+          <input
+            id="running-duration-range"
+            type="range"
+            min="0"
+            max="2"
+            step="1"
+            value="1"
+          />
+
+          <div class="duration-options">
+            <output id="running-duration-value" for="running-duration-range">
+              20분
+            </output>
+
+            <label class="break-toggle">
+              <input type="checkbox" id="break-option" />
+              중간 휴식 설정
+            </label>
+          </div>
+
+          <fieldset id="break-options" hidden>
+            <legend>휴식 횟수</legend>
+
+            <label>
+              <input type="radio" name="break-count" value="1" />
+              1회
+            </label>
+
+            <label>
+              <input type="radio" name="break-count" value="2" checked />
+              2회
+            </label>
+
+            <label>
+              <input type="radio" name="break-count" value="3" />
+              3회
+            </label>
+          </fieldset>
+
+          <div class="step-actions">
+            <button id="session-option-prev" type="button">이전</button>
+            <button id="session-option-next" type="button">
+              내용 확인하기
+            </button>
+          </div>
+        </section>
+
+        <section class="step" data-step="3" hidden>
+          <h3>입력한 러닝 설정을 확인해주세요.</h3>
+
+          <div class="summary-list">
+            <div>
+              <span>세션 이름</span>
+              <strong id="summary-session-title"></strong>
+            </div>
+
+            <div>
+              <span>러닝 시간</span>
+              <strong id="summary-running-duration"></strong>
+            </div>
+
+            <div>
+              <span>중간 휴식</span>
+              <strong id="summary-breaks"></strong>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button id="session-summary-prev" type="button">수정하기</button>
+            <button id="session-finish-button" type="button">
+              설정 완료하기
+            </button>
+          </div>
+        </section>
+
+        <section class="step complete-step" data-step="4" hidden>
+          <h3>러닝 세션 설정이 완료되었습니다.</h3>
+          <p>
+            설정한 러닝 조건을 확인했습니다. 필요하면 다시 설정할 수 있습니다.
+          </p>
+          <button id="session-restart-button" type="button">
+            다시 설정하기
+          </button>
+        </section>
       </section>
 
       <section id="subscribe" class="subscribe-card">
@@ -187,9 +322,10 @@
 
         <form id="subscribe-form">
           <label for="email">이메일</label>
-          <input type="email" id="email" name="email" />
+          <input type="email" id="email" name="email" required />
           <button id="subscribeButton" type="submit">러닝 소식 신청하기</button>
         </form>
+
         <p id="subscribeMessage" aria-live="polite">
           이메일을 입력한 뒤 신청해주세요.
         </p>
@@ -197,7 +333,7 @@
     </main>
 
     <footer>
-      <small>ⓒ 2026 맞춤형 러닝 코치</small>
+      <small>© 2026 맞춤형 러닝 코치 RunMate</small>
     </footer>
 
     <script src="script.js"></script>
