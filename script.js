@@ -551,14 +551,16 @@ function renderTimeline(container) {
     item.classList.toggle("is-skipped", status === "skipped");
 
     let stateText = "";
-    if (isCurrent) stateText = " · 진행 중";
-    if (status === "done") stateText = " · 완료";
-    if (status === "skipped") stateText = " · 건너뜀";
+    if (isCurrent) stateText = "진행 중";
+    if (status === "done") stateText = "완료";
+    if (status === "skipped") stateText = "건너뜀";
 
+    // 상태 글자는 이름 옆이 아니라 두 번째 줄에 따로 둔다
     item.innerHTML =
-      '<span class="timeline-name"></span><span class="timeline-time"></span>';
-    item.querySelector(".timeline-name").textContent =
-      segmentLabel(segment) + stateText;
+      '<span class="timeline-name"></span><span class="timeline-time"></span>' +
+      '<span class="timeline-state"></span>';
+    item.querySelector(".timeline-name").textContent = segmentLabel(segment);
+    item.querySelector(".timeline-state").textContent = stateText;
     item.querySelector(".timeline-time").textContent = formatKoreanTime(
       segment.seconds,
     );
@@ -694,10 +696,10 @@ function renderPlayer() {
   );
 
   playerStage.dataset.kind = segment.kind;
-  playerSegmentLabel.textContent =
-    segmentLabel(segment) + (player.state === "paused" ? " · 일시정지" : "");
+  playerSegmentLabel.textContent = segmentLabel(segment);
   playerRemaining.textContent = formatTime(remaining);
-  playerRemainingCaption.textContent = "남음";
+  playerRemainingCaption.textContent =
+    player.state === "paused" ? "일시정지 중" : "남음";
   playerRing.style.setProperty(
     "--progress",
     Math.max(0, remaining / segment.seconds),
