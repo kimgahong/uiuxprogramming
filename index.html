@@ -212,22 +212,39 @@
           <span class="progress_item" data-progress="4">4 · 러닝</span>
         </p>
 
+        <form id="session-form" novalidate aria-busy="false">
         <section class="step" data-step="1" data-progress="1" hidden>
           <h3>러닝 세션 이름을 입력해주세요</h3>
 
-          <label for="session-title">세션 이름</label>
-          <input
-            id="session-title"
-            type="text"
-            placeholder="예: 첫 3km 러닝"
-            aria-describedby="session-title-error"
-          />
+          <div id="session-title-field">
+            <label for="session-title">
+              세션 이름
+              <span class="required">필수</span>
+            </label>
+            <input
+              id="session-title"
+              name="title"
+              type="text"
+              minlength="2"
+              maxlength="20"
+              required
+              placeholder="예: 첫 3km 러닝"
+              aria-describedby="session-title-help session-title-count session-title-error"
+            />
 
-          <p
-            id="session-title-error"
-            class="error-message"
-            aria-live="polite"
-          ></p>
+            <div class="field-meta">
+              <p id="session-title-help">
+                세션을 구분할 수 있도록 2자 이상 입력해 주세요.
+              </p>
+              <p id="session-title-count" aria-live="polite">0 / 20자</p>
+            </div>
+
+            <p
+              id="session-title-error"
+              class="error-message"
+              role="alert"
+            ></p>
+          </div>
 
           <button id="session-title-next" type="button">
             러닝 조건 선택하기
@@ -240,12 +257,19 @@
           <label for="running-duration-range">러닝 시간</label>
           <input
             id="running-duration-range"
+            name="duration-index"
             type="range"
             min="0"
             max="2"
             step="1"
             value="1"
+            aria-describedby="running-duration-help"
           />
+          <div class="field-meta">
+            <p id="running-duration-help">
+              10분, 20분, 30분 중에서 고를 수 있습니다.
+            </p>
+          </div>
 
           <div class="duration-options">
             <output id="running-duration-value" for="running-duration-range">
@@ -253,26 +277,40 @@
             </output>
 
             <label class="break-toggle">
-              <input type="checkbox" id="break-option" />
+              <input
+                type="checkbox"
+                id="break-option"
+                name="breaks"
+                value="included"
+                aria-controls="break-options"
+                aria-expanded="false"
+                aria-describedby="break-option-help"
+              />
               중간 휴식 설정
             </label>
           </div>
+          <div class="field-meta">
+            <p id="break-option-help">
+              켜면 걷기 휴식 횟수를 고를 수 있습니다. 달리기 한 구간이 2분보다
+              짧아지면 휴식 횟수가 자동으로 줄어듭니다.
+            </p>
+          </div>
 
           <fieldset id="break-options" hidden>
-            <legend>휴식 횟수</legend>
+            <legend>걷기 휴식 횟수</legend>
 
             <label>
-              <input type="radio" name="break-count" value="1" />
+              <input type="radio" name="break-count" value="1" disabled />
               1회
             </label>
 
             <label>
-              <input type="radio" name="break-count" value="2" checked />
+              <input type="radio" name="break-count" value="2" checked disabled />
               2회
             </label>
 
             <label>
-              <input type="radio" name="break-count" value="3" />
+              <input type="radio" name="break-count" value="3" disabled />
               3회
             </label>
           </fieldset>
@@ -311,6 +349,8 @@
             </div>
           </div>
 
+          <p id="session-submit-status" role="status" aria-live="polite"></p>
+
           <div class="step-actions">
             <button
               id="session-summary-prev"
@@ -319,15 +359,16 @@
             >
               수정하기
             </button>
-            <button id="session-finish-button" type="button">
+            <button id="session-finish-button" type="submit">
               설정 완료하기
             </button>
           </div>
         </section>
+        </form>
 
         <section class="step complete-step" data-step="4" hidden>
           <h3>러닝 세션 설정이 완료되었습니다.</h3>
-          <p>
+          <p id="session-complete-message">
             설정한 러닝 조건을 확인했습니다. 이 설정으로 바로 러닝을 시작하거나
             처음부터 다시 설정할 수 있습니다.
           </p>

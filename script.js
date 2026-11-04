@@ -132,10 +132,16 @@ tabs.forEach((tab) => {
 const runningFlow = document.querySelector("#running-flow");
 const runningSteps = runningFlow.querySelectorAll(".step");
 const progressItems = runningFlow.querySelectorAll(".progress_item");
+const sessionForm = document.querySelector("#session-form");
 
+const sessionTitleField = document.querySelector("#session-title-field");
 const sessionTitleInput = document.querySelector("#session-title");
+const sessionTitleHelp = document.querySelector("#session-title-help");
+const sessionTitleCount = document.querySelector("#session-title-count");
 const sessionTitleError = document.querySelector("#session-title-error");
 const sessionTitleNext = document.querySelector("#session-title-next");
+const sessionTitleHelpDefault =
+  "세션을 구분할 수 있도록 2자 이상 입력해 주세요.";
 
 const runningDurationRange = document.querySelector("#running-duration-range");
 const runningDurationValue = document.querySelector("#running-duration-value");
@@ -146,7 +152,14 @@ const sessionOptionPrev = document.querySelector("#session-option-prev");
 const sessionOptionNext = document.querySelector("#session-option-next");
 const sessionSummaryPrev = document.querySelector("#session-summary-prev");
 const sessionFinishButton = document.querySelector("#session-finish-button");
+const sessionFinishLabel = "설정 완료하기";
 const sessionRestartButton = document.querySelector("#session-restart-button");
+const sessionSubmitStatus = document.querySelector("#session-submit-status");
+const sessionCompleteMessage = document.querySelector(
+  "#session-complete-message",
+);
+const sessionCompleteDefaultText =
+  "설정한 러닝 조건을 확인했습니다. 이 설정으로 바로 러닝을 시작하거나 처음부터 다시 설정할 수 있습니다.";
 
 const summarySessionTitle = document.querySelector("#summary-session-title");
 const summaryRunningDuration = document.querySelector(
@@ -163,6 +176,11 @@ const sessionData = {
   breakCount: "2",
 };
 
+// 주소에 ?save-error=1 이 있으면 저장을 일부러 실패시킨다
+const forceSaveFailure = new URLSearchParams(location.search).has("save-error");
+
+let currentRunningStep = 0;
+
 function showRunningStep(index) {
   runningSteps.forEach((step, i) => {
     step.hidden = i !== index;
@@ -177,6 +195,18 @@ function showRunningStep(index) {
       item.dataset.progress === activeProgress,
     );
   });
+
+  currentRunningStep = index;
+
+  const activeStep = runningSteps[index];
+  const heading =
+    activeStep.querySelector("h3") ||
+    activeStep.querySelector("h1, h2, h4, h5, h6");
+
+  if (!heading) return;
+
+  heading.tabIndex = -1;
+  heading.focus({ preventScroll: true });
 }
 
 // 러닝 안전 안내 다이얼로그
@@ -216,26 +246,68 @@ runningGuideConfirm.addEventListener("click", () => {
   sessionTitleInput.focus();
 });
 
-// 세션 이름 확인
+// 세션 이름: 글자 수와 조건 충족 표시. 오류가 확정되기 전에는 빨갛게 바꾸지 않는다
+function updateTitleExperience() {
+  const length = sessionTitleInput.value.length;
+  sessionTitleCount.textContent = length + " / 20자";
+
+  const meetsLength = sessionTitleInput.value.trim().length >= 2;
+  const invalid = sessionTitleInput.getAttribute("aria-invalid") === "true";
+
+  if (!invalid && meetsLength) {
+    sessionTitleField.classList.add("is-valid");
+    sessionTitleHelp.textContent = "입력 조건을 충족했습니다.";
+    return;
+  }
+
+  sessionTitleField.classList.remove("is-valid");
+  sessionTitleHelp.textContent = sessionTitleHelpDefault;
+}
+
+function showTitleError(message) {
+  sessionTitleInput.setAttribute("aria-invalid", "true");
+  sessionTitleError.textContent = message;
+  sessionTitleField.classList.remove("is-valid");
+  sessionTitleField.classList.add("has-error");
+  sessionTitleHelp.textContent = sessionTitleHelpDefault;
+  return false;
+}
+
+function clearTitleError() {
+  sessionTitleInput.removeAttribute("aria-invalid");
+  sessionTitleError.textContent = "";
+  sessionTitleField.classList.remove("has-error");
+  updateTitleExperience();
+}
+
 function validateSessionTitle() {
   const value = sessionTitleInput.value.trim();
 
   if (!value) {
-    sessionTitleError.textContent = "러닝 세션 이름을 입력해주세요.";
-    sessionTitleInput.classList.add("has-error");
-    sessionTitleInput.focus();
-    return false;
+    return showTitleError("러닝 세션 이름을 입력해 주세요.");
   }
 
-  sessionTitleError.textContent = "";
-  sessionTitleInput.classList.remove("has-error");
-  sessionData.title = value;
+  if (value.length < 2) {
+    return showTitleError("러닝 세션 이름을 2자 이상 입력해 주세요.");
+  }
 
+  clearTitleError();
   return true;
 }
 
+sessionTitleInput.addEventListener("input", () => {
+  const invalid = sessionTitleInput.getAttribute("aria-invalid") === "true";
+
+  updateTitleExperience();
+
+  if (invalid) validateSessionTitle();
+});
+
 sessionTitleNext.addEventListener("click", () => {
-  if (!validateSessionTitle()) return;
+  if (!validateSessionTitle()) {
+    sessionTitleInput.focus();
+    return;
+  }
 
   showRunningStep(1);
 });
@@ -246,32 +318,57 @@ runningDurationRange.addEventListener("input", () => {
     runningDurationValues[Number(runningDurationRange.value)] + "분";
 });
 
-// 휴식 설정 표시
-breakOption.addEventListener("change", () => {
-  breakOptions.hidden = !breakOption.checked;
-});
+// 휴식 체크와 횟수 라디오를 같이 맞춘다. 꺼지면 라디오가 제출에서 빠진다
+function syncBreakFields() {
+  const included = breakOption.checked;
+
+  breakOption.setAttribute("aria-expanded", included ? "true" : "false");
+  breakOptions.hidden = !included;
+
+  breakOptions.querySelectorAll('input[name="break-count"]').forEach((input) => {
+    input.disabled = !included;
+  });
+}
+
+breakOption.addEventListener("change", syncBreakFields);
+syncBreakFields();
 
 // 이전 단계
 sessionOptionPrev.addEventListener("click", () => {
   showRunningStep(0);
 });
 
+function collectSessionData() {
+  const formData = new FormData(sessionForm);
+  const titleValue = formData.get("title");
+  const title = titleValue ? String(titleValue).trim() : "";
+  const duration = runningDurationValues[Number(formData.get("duration-index"))];
+  const includeBreaks = formData.get("breaks") === "included";
+  const breakCountValue = formData.get("break-count");
+  const breakCount = breakCountValue ? String(breakCountValue) : "2";
+
+  return {
+    title: title,
+    duration: duration,
+    includeBreaks: includeBreaks,
+    breakCount: breakCount,
+  };
+}
+
+function applySessionData(data) {
+  sessionData.title = data.title;
+  sessionData.duration = data.duration;
+  sessionData.includeBreaks = data.includeBreaks;
+  sessionData.breakCount = data.breakCount;
+}
+
 // 설정 확인
 sessionOptionNext.addEventListener("click", () => {
-  sessionData.duration =
-    runningDurationValues[Number(runningDurationRange.value)];
-
-  sessionData.includeBreaks = breakOption.checked;
-
-  const selectedBreakCount = document.querySelector(
-    'input[name="break-count"]:checked',
-  );
-
-  sessionData.breakCount = selectedBreakCount ? selectedBreakCount.value : "2";
+  const data = collectSessionData();
+  applySessionData(data);
 
   summarySessionTitle.textContent = sessionData.title;
   summaryRunningDuration.textContent = sessionData.duration + "분";
-
   summaryBreaks.textContent = sessionData.includeBreaks
     ? sessionData.breakCount + "회"
     : "설정하지 않음";
@@ -284,41 +381,128 @@ sessionSummaryPrev.addEventListener("click", () => {
   showRunningStep(1);
 });
 
-// 설정 완료
-sessionFinishButton.addEventListener("click", () => {
-  showRunningStep(3);
-});
+function setSubmitState(loading, message) {
+  sessionForm.setAttribute("aria-busy", loading ? "true" : "false");
+  sessionFinishButton.disabled = loading;
+  sessionFinishButton.textContent = loading ? "저장하는 중…" : sessionFinishLabel;
+  sessionSummaryPrev.disabled = loading;
+  sessionSubmitStatus.textContent = message;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function persistSession(data) {
+  return wait(600).then(() => {
+    if (forceSaveFailure) {
+      throw new Error("러닝 세션 설정을 저장하지 못했습니다.");
+    }
+
+    try {
+      const saved = localStorage.getItem("runmate-sessions");
+      const sessions = saved ? JSON.parse(saved) : [];
+
+      if (!Array.isArray(sessions)) {
+        throw new Error("러닝 세션 저장 형식이 올바르지 않습니다.");
+      }
+
+      const id =
+        window.crypto && typeof window.crypto.randomUUID === "function"
+          ? window.crypto.randomUUID()
+          : String(Date.now()) + Math.random().toString(16).slice(2);
+
+      sessions.unshift({
+        id: id,
+        ...data,
+        createdAt: new Date().toISOString(),
+      });
+
+      localStorage.setItem("runmate-sessions", JSON.stringify(sessions));
+    } catch (error) {
+      throw error;
+    }
+  });
+}
+
+function handleSessionSubmit(event) {
+  event.preventDefault();
+
+  if (sessionForm.getAttribute("aria-busy") === "true") return;
+
+  if (currentRunningStep === 0) {
+    sessionTitleNext.click();
+    return;
+  }
+
+  if (currentRunningStep === 1) {
+    sessionOptionNext.click();
+    return;
+  }
+
+  if (currentRunningStep !== 2) return;
+
+  if (!validateSessionTitle()) {
+    showRunningStep(0);
+    requestAnimationFrame(() => {
+      const invalidField = sessionForm.querySelector('[aria-invalid="true"]');
+
+      if (invalidField) invalidField.focus();
+    });
+    return;
+  }
+
+  const data = collectSessionData();
+  applySessionData(data);
+  setSubmitState(true, "러닝 세션 설정을 저장하고 있습니다.");
+
+  persistSession(data).then(
+    () => {
+      setSubmitState(false, "러닝 세션 설정을 저장했습니다.");
+      sessionCompleteMessage.textContent =
+        "‘" +
+        data.title +
+        "’ 설정을 저장했습니다. 이제 이 설정으로 러닝을 시작할 수 있습니다.";
+      showRunningStep(3);
+    },
+    () => {
+      setSubmitState(
+        false,
+        "저장하지 못했습니다. 입력한 내용은 그대로 두었습니다. 다시 시도해 주세요.",
+      );
+    },
+  );
+}
+
+sessionForm.addEventListener("submit", handleSessionSubmit);
 
 // 처음부터 다시 설정
 function resetSessionSetup() {
+  sessionForm.reset();
+  syncBreakFields();
+
+  sessionTitleInput.removeAttribute("aria-invalid");
+  sessionTitleError.textContent = "";
+  sessionTitleField.classList.remove("is-valid", "has-error");
+  updateTitleExperience();
+  setSubmitState(false, "");
+
   sessionData.title = "";
   sessionData.duration = "20";
   sessionData.includeBreaks = false;
   sessionData.breakCount = "2";
 
-  sessionTitleInput.value = "";
-  sessionTitleError.textContent = "";
-  sessionTitleInput.classList.remove("has-error");
-
-  runningDurationRange.value = "1";
   runningDurationValue.value = "20분";
-
-  breakOption.checked = false;
-  breakOptions.hidden = true;
-
-  const defaultBreakCount = document.querySelector(
-    'input[name="break-count"][value="2"]',
-  );
-
-  if (defaultBreakCount) {
-    defaultBreakCount.checked = true;
-  }
 
   summarySessionTitle.textContent = "";
   summaryRunningDuration.textContent = "";
   summaryBreaks.textContent = "";
+  sessionCompleteMessage.textContent = sessionCompleteDefaultText;
 
   showRunningStep(0);
+  sessionTitleInput.focus();
 }
 
 sessionRestartButton.addEventListener("click", resetSessionSetup);

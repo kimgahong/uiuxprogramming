@@ -17,6 +17,9 @@
   --color-danger-text: #9a4b45;
   --color-on-danger: #ffffff;
 
+  --color-success: #2f7a55;
+  --color-success-text: #1e6844;
+
   --color-sage: #a9c0b3;
   --color-sage-soft: #eef3ef;
 
@@ -63,6 +66,9 @@ body.dark {
   --color-danger-soft: #3d2c2a;
   --color-danger-text: #edb0a9;
   --color-on-danger: #1e1514;
+
+  --color-success: #8ed9b8;
+  --color-success-text: #d7f6e8;
 
   --color-sage: #6f8d7e;
   --color-sage-soft: #2c3a35;
@@ -438,9 +444,59 @@ input[type="radio"] {
   content: "⚠ ";
 }
 
-.running-flow #session-title.has-error {
+/* 세션 이름: 오류·성공은 입력칸이 아니라 필드 묶음에 붙인다 */
+#session-title-field.has-error #session-title {
   border-color: var(--color-danger);
   background-color: var(--color-danger-soft);
+}
+
+#session-title-field.is-valid #session-title {
+  border-color: var(--color-success);
+}
+
+#session-title-field.is-valid #session-title-help {
+  color: var(--color-success-text);
+  font-weight: 700;
+}
+
+.field-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+
+.field-meta p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#session-title-help {
+  flex: 1 1 12em;
+}
+
+#session-title-count {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.required {
+  margin-left: 8px;
+  color: var(--color-danger-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#session-submit-status {
+  min-height: 24px;
+  margin: 16px 0 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
 }
 
 /* ===== 기능 탭 ===== */
@@ -552,6 +608,11 @@ form {
   gap: 12px;
 }
 
+/* 구독 폼만 가로로 둔다. 세션 설정은 단계를 세로로 쌓는다 */
+#session-form {
+  display: block;
+}
+
 form input {
   flex: 1;
 }
@@ -635,10 +696,21 @@ form label {
   font-weight: 700;
 }
 
-.running-flow .step > label {
+.running-flow .step > label,
+#session-title-field > label {
   display: block;
   margin-bottom: 8px;
   font-weight: 700;
+}
+
+.running-flow .step h3:focus {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+#session-form :is(input, button):focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .running-flow #session-title {
