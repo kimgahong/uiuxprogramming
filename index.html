@@ -19,12 +19,22 @@
       <h1>맞춤형 <span class="accent-run">러닝</span> 코치</h1>
       <p>나에게 맞는 러닝 계획으로 꾸준히 달리고 목표를 달성해보세요.</p>
 
-      <nav aria-label="주요 메뉴">
-        <a href="#about">서비스 소개</a>
-        <a href="#features">러닝 기능</a>
-        <a href="#interaction-practice">러닝 설정</a>
-        <a href="#steps">이용 방법</a>
-        <a href="#subscribe">러닝 소식 받기</a>
+      <button
+        id="menu-toggle"
+        class="menu-toggle button-secondary"
+        type="button"
+        aria-controls="main-nav"
+        aria-expanded="false"
+      >
+        메뉴 열기
+      </button>
+
+      <nav id="main-nav" class="main-nav" aria-label="주요 메뉴">
+        <ul>
+          <li><a href="#about">서비스 소개</a></li>
+          <li><a href="#interaction-practice">러닝 설정</a></li>
+          <li><a href="#records">내 러닝 기록</a></li>
+        </ul>
       </nav>
     </header>
 
@@ -573,6 +583,59 @@
           </button>
         </div>
       </dialog>
+
+      <section id="records" class="records-section">
+        <div class="section-heading">
+          <h2>내 러닝 기록</h2>
+          <p>저장한 러닝 세션 설정을 상태별로 다시 확인할 수 있습니다.</p>
+        </div>
+
+        <div
+          class="record-filters"
+          role="group"
+          aria-label="러닝 기록 표시 범위"
+        >
+          <button
+            class="filter-button is-active"
+            type="button"
+            data-filter="all"
+            aria-pressed="true"
+          >
+            전체
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-filter="active"
+            aria-pressed="false"
+          >
+            저장됨
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-filter="cancelled"
+            aria-pressed="false"
+          >
+            취소됨
+          </button>
+        </div>
+
+        <p id="records-status" class="records-status">
+          표시 중인 기록 <strong id="records-count">0</strong>개
+        </p>
+        <p id="records-message" class="records-message" role="status"></p>
+
+        <div id="records-empty" class="records-empty" hidden>
+          <h3>아직 저장한 러닝 설정이 없어요.</h3>
+          <p>러닝 세션을 설정하고 저장하면 이곳에서 다시 볼 수 있습니다.</p>
+          <a class="records-empty-link" href="#interaction-practice">
+            러닝 설정하러 가기
+          </a>
+        </div>
+
+        <ul id="records-list" class="records-list"></ul>
+      </section>
 
       <section id="subscribe" class="subscribe-card">
         <h2>러닝 소식 받기</h2>

@@ -461,6 +461,7 @@ function handleSessionSubmit(event) {
   persistSession(data).then(
     () => {
       setSubmitState(false, "러닝 세션 설정을 저장했습니다.");
+      renderRecords();
       sessionCompleteMessage.textContent =
         "‘" +
         data.title +
@@ -1247,3 +1248,281 @@ document.addEventListener("visibilitychange", () => {
     "다른 화면으로 이동해서 자동으로 일시정지했어요. 준비되면 [계속]을 눌러주세요.",
   );
 });
+
+// ===== 10주차: 내비게이션과 내 러닝 기록 필터 =====
+
+// 주요 메뉴와 현재 위치
+const navLinks = document.querySelectorAll(".main-nav a");
+const menuToggle = document.querySelector("#menu-toggle");
+const mainNav = document.querySelector("#main-nav");
+
+function updateCurrentNav() {
+  const currentHash = window.location.hash;
+  const hasMatch = Array.from(navLinks).some(
+    (link) => link.getAttribute("href") === currentHash,
+  );
+
+  navLinks.forEach((link) => {
+    // 주소에 메뉴 목적지가 없으면 첫 메뉴를 현재 위치로 본다
+    const current = hasMatch
+      ? link.getAttribute("href") === currentHash
+      : link === navLinks[0];
+
+    link.classList.toggle("is-current", current);
+
+    if (current) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+window.addEventListener("hashchange", updateCurrentNav);
+updateCurrentNav();
+
+function setMenuOpen(isOpen) {
+  mainNav.classList.toggle("is-open", isOpen);
+  menuToggle.textContent = isOpen ? "메뉴 닫기" : "메뉴 열기";
+  menuToggle.setAttribute("aria-expanded", String(isOpen));
+}
+
+menuToggle.addEventListener("click", () => {
+  setMenuOpen(!mainNav.classList.contains("is-open"));
+});
+
+// 목적지를 고르면 메뉴를 닫는다
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    setMenuOpen(false);
+  });
+});
+
+// Esc로 열린 메뉴를 닫고 메뉴 버튼으로 돌아간다
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !mainNav.classList.contains("is-open")) return;
+
+  setMenuOpen(false);
+  menuToggle.focus();
+});
+
+// 내 러닝 기록: 9주차에 저장한 runmate-sessions를 카드로 보여 준다
+const RECORDS_KEY = "runmate-sessions";
+const recordsList = document.querySelector("#records-list");
+const recordsEmpty = document.querySelector("#records-empty");
+const recordsStatus = document.querySelector("#records-status");
+const recordsCount = document.querySelector("#records-count");
+const recordsMessage = document.querySelector("#records-message");
+const filterButtons = document.querySelectorAll(".filter-button");
+const openRecordIds = new Set();
+let currentFilter = "all";
+
+function getSessions() {
+  try {
+    const saved = localStorage.getItem(RECORDS_KEY);
+    const sessions = saved ? JSON.parse(saved) : [];
+
+    return Array.isArray(sessions) ? sessions : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveSessions(sessions) {
+  try {
+    localStorage.setItem(RECORDS_KEY, JSON.stringify(sessions));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// all: 전체, active: 취소하지 않은 설정, cancelled: 취소한 설정
+function getVisibleSessions(sessions) {
+  return sessions.filter((session) => {
+    if (currentFilter === "all") return true;
+    if (currentFilter === "cancelled") return session.cancelled === true;
+    return session.cancelled !== true;
+  });
+}
+
+function formatSavedDate(isoText) {
+  const date = new Date(isoText);
+
+  if (Number.isNaN(date.getTime())) return "날짜 정보 없음";
+
+  return date.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function createSummaryRow(label, value) {
+  const row = document.createElement("div");
+  const name = document.createElement("span");
+  const text = document.createElement("strong");
+
+  name.textContent = label;
+  text.textContent = value;
+  row.append(name, text);
+
+  return row;
+}
+
+function createRecordCard(session) {
+  const cancelled = session.cancelled === true;
+  const isOpen = openRecordIds.has(session.id);
+  const detailId = "record-detail-" + session.id;
+
+  const card = document.createElement("li");
+  card.className = "record-card";
+  card.dataset.status = cancelled ? "cancelled" : "active";
+
+  const badge = document.createElement("p");
+  badge.className = "record-badge";
+  badge.textContent = cancelled ? "취소됨" : "저장됨";
+
+  const title = document.createElement("h3");
+  title.textContent = session.title || "이름 없는 세션";
+
+  const date = document.createElement("p");
+  date.className = "record-date";
+  date.textContent = formatSavedDate(session.createdAt) + " 저장";
+
+  const detail = document.createElement("div");
+  detail.id = detailId;
+  detail.className = "summary-list record-detail";
+  detail.hidden = !isOpen;
+  detail.append(
+    createSummaryRow("러닝 시간", (session.duration || "-") + "분"),
+    createSummaryRow(
+      "중간 휴식",
+      session.includeBreaks ? session.breakCount + "회" : "설정하지 않음",
+    ),
+    createSummaryRow("상태", cancelled ? "취소한 설정" : "저장된 설정"),
+  );
+
+  const actions = document.createElement("div");
+  actions.className = "record-actions";
+
+  const viewButton = document.createElement("button");
+  viewButton.type = "button";
+  viewButton.className = "button-secondary";
+  viewButton.dataset.action = "view";
+  viewButton.dataset.id = session.id;
+  viewButton.setAttribute("aria-expanded", String(isOpen));
+  viewButton.setAttribute("aria-controls", detailId);
+  viewButton.textContent = isOpen ? "내용 접기" : "내용 보기";
+  actions.append(viewButton);
+
+  if (!cancelled) {
+    const cancelButton = document.createElement("button");
+    cancelButton.type = "button";
+    cancelButton.className = "button-danger";
+    cancelButton.dataset.action = "cancel";
+    cancelButton.dataset.id = session.id;
+    cancelButton.textContent = "설정 취소하기";
+    actions.append(cancelButton);
+  }
+
+  card.append(badge, title, date, detail, actions);
+
+  return card;
+}
+
+function renderRecords() {
+  const sessions = getSessions();
+  const visibleSessions = getVisibleSessions(sessions);
+
+  recordsList.replaceChildren();
+  recordsEmpty.hidden = visibleSessions.length !== 0;
+  recordsList.hidden = visibleSessions.length === 0;
+
+  const emptyTitle = recordsEmpty.querySelector("h3");
+  const emptyDescription = recordsEmpty.querySelector("p");
+  const emptyAction = recordsEmpty.querySelector("a");
+
+  if (visibleSessions.length === 0) {
+    const filtered = currentFilter !== "all";
+
+    emptyTitle.textContent = filtered
+      ? "선택한 상태의 러닝 설정이 없어요."
+      : "아직 저장한 러닝 설정이 없어요.";
+    emptyDescription.textContent = filtered
+      ? "다른 상태를 선택해 보세요."
+      : "러닝 세션을 설정하고 저장하면 이곳에서 다시 볼 수 있습니다.";
+    emptyAction.hidden = filtered;
+  }
+
+  recordsCount.textContent = String(visibleSessions.length);
+
+  visibleSessions.forEach((session) => {
+    recordsList.append(createRecordCard(session));
+  });
+}
+
+filterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    recordsMessage.textContent = "";
+
+    filterButtons.forEach((item) => {
+      const selected = item === button;
+      item.classList.toggle("is-active", selected);
+      item.setAttribute("aria-pressed", String(selected));
+    });
+
+    renderRecords();
+  });
+});
+
+recordsList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action]");
+
+  if (!button) return;
+
+  const id = button.dataset.id;
+
+  if (button.dataset.action === "view") {
+    if (openRecordIds.has(id)) {
+      openRecordIds.delete(id);
+    } else {
+      openRecordIds.add(id);
+    }
+
+    renderRecords();
+    const sameButton = recordsList.querySelector(
+      'button[data-action="view"][data-id="' + CSS.escape(id) + '"]',
+    );
+
+    if (sameButton) sameButton.focus();
+    return;
+  }
+
+  if (button.dataset.action === "cancel") {
+    const sessions = getSessions();
+    const target = sessions.find((session) => session.id === id);
+
+    if (!target) return;
+
+    target.cancelled = true;
+    target.cancelledAt = new Date().toISOString();
+
+    if (!saveSessions(sessions)) {
+      recordsMessage.textContent =
+        "설정을 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+      return;
+    }
+
+    renderRecords();
+    recordsMessage.textContent =
+      "‘" + (target.title || "이름 없는 세션") + "’ 설정을 취소했습니다.";
+    recordsStatus.tabIndex = -1;
+    recordsStatus.focus();
+  }
+});
+
+renderRecords();

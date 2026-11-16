@@ -214,7 +214,8 @@ header p {
 }
 
 /* 섹션 제목 앞의 작은 그린 막대 */
-main > section > h2::before {
+main > section > h2::before,
+.records-section .section-heading h2::before {
   content: "";
   display: inline-block;
   width: 6px;
@@ -225,28 +226,60 @@ main > section > h2::before {
   vertical-align: -0.05em;
 }
 
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+/* ===== 주요 메뉴 (10주차) ===== */
+.main-nav {
   margin-top: 24px;
 }
 
-nav a {
+.main-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main-nav a {
+  display: inline-block;
   padding: 6px 14px;
   border-radius: var(--radius-pill);
   color: var(--color-text-muted);
   font-size: 15px;
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
   transition:
     color 0.2s,
-    background-color 0.2s;
+    background-color 0.2s,
+    box-shadow 0.2s;
 }
 
-nav a:hover {
+.main-nav a:hover {
   color: var(--color-primary-text);
   background-color: var(--color-primary-soft);
+}
+
+/* 지금 보고 있는 목적지: 연한 그린 바탕 + 아래 그린 선 */
+.main-nav a.is-current {
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-soft);
+  box-shadow: inset 0 -3px 0 var(--color-primary);
+}
+
+.main-nav a:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* 메뉴 버튼은 600px 이하에서만 보인다 */
+.menu-toggle {
+  display: none;
+  width: auto;
+  min-height: 44px;
+  margin-top: 20px;
+  padding: 0 16px;
 }
 
 #steps ol {
@@ -1183,6 +1216,208 @@ form label {
   color: var(--color-primary);
 }
 
+/* ===== 내 러닝 기록 (10주차) ===== */
+.records-section .section-heading h2 {
+  margin-bottom: 8px;
+}
+
+.records-section .section-heading p {
+  margin: 0 0 20px;
+  color: var(--color-text-muted);
+}
+
+.record-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-button {
+  width: auto;
+  min-height: 42px;
+  padding: 0 18px;
+  border-color: var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+}
+
+.filter-button:hover {
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+.filter-button.is-active,
+.filter-button.is-active:hover {
+  color: var(--color-on-primary);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.filter-button.is-active::before {
+  content: "✓ ";
+}
+
+.records-status {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 15px;
+}
+
+.records-status strong {
+  color: var(--color-text);
+}
+
+.records-message {
+  margin: 4px 0 0;
+  color: var(--color-primary-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.records-message:empty {
+  display: none;
+}
+
+.records-empty {
+  margin-top: 16px;
+  padding: var(--space-card);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface-muted);
+}
+
+.records-empty h3 {
+  margin: 0 0 4px;
+}
+
+.records-empty p {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.records-empty-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  border-radius: var(--radius-md);
+  color: var(--color-on-primary);
+  background-color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.records-empty-link:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.records-empty-link[hidden] {
+  display: none;
+}
+
+.records-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.records-list[hidden] {
+  display: none;
+}
+
+.record-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-left: 5px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.record-card[data-status="cancelled"] {
+  border-left-color: var(--color-danger);
+}
+
+.record-badge {
+  align-self: flex-start;
+  margin: 0;
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.record-badge::before {
+  content: "✓ ";
+}
+
+.record-card[data-status="cancelled"] .record-badge {
+  color: var(--color-danger-text);
+  background-color: var(--color-danger-soft);
+}
+
+.record-card[data-status="cancelled"] .record-badge::before {
+  content: "✕ ";
+}
+
+.record-card h3 {
+  margin: 10px 0 2px;
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+
+.record-card[data-status="cancelled"] h3 {
+  color: var(--color-text-muted);
+}
+
+.record-date {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.record-detail {
+  margin-top: 12px;
+}
+
+.record-detail > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 15px;
+}
+
+.record-detail span {
+  color: var(--color-text-muted);
+}
+
+.record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.record-actions button {
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
+}
+
 /* ===== 반응형 ===== */
 /* 태블릿: 설정 카드 세 개가 좁아져 문장이 잘게 끊기지 않도록 안전 확인 카드를 한 줄 전체로 넓힌다 */
 @media (max-width: 1000px) {
@@ -1214,15 +1449,6 @@ form label {
 
   h2 {
     font-size: 24px;
-  }
-
-  nav {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  nav a {
-    padding: 10px 12px;
   }
 
   form {
@@ -1305,5 +1531,56 @@ form label {
 
   .result-card {
     padding: 20px 16px;
+  }
+}
+
+/* 모바일: 600px 이하에서는 메뉴를 버튼으로 열고 닫는다 */
+@media (max-width: 600px) {
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+  }
+
+  .main-nav {
+    display: none;
+    margin-top: 12px;
+  }
+
+  .main-nav.is-open {
+    display: block;
+  }
+
+  .main-nav ul {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .main-nav a {
+    display: block;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+  }
+
+  .filter-button {
+    flex: 1 1 0;
+    width: auto;
+    padding: 0 10px;
+  }
+
+  .records-list {
+    grid-template-columns: 1fr;
+  }
+
+  .record-card {
+    padding: 18px;
+  }
+
+  .record-actions button {
+    flex: 1 1 0;
+    width: auto;
   }
 }
