@@ -1585,13 +1585,17 @@ filterButtons.forEach((button) => {
 
     // 11주차: 필터 결과 수와 결과 없음을 상태 문장(role="status")으로 알린다
     const count = getVisibleSessions(getSessions()).length;
-    const filterName = button.textContent.trim();
+    const recordName = {
+      all: "전체 기록",
+      active: "저장된 기록",
+      cancelled: "취소된 기록",
+    }[currentFilter];
 
     recordsMessage.textContent =
       count > 0
-        ? filterName + " 기록 " + count + "개를 표시합니다."
-        : filterName +
-          " 기록이 없습니다. 다른 상태를 고르거나 ‘전체 보기’를 눌러 보세요.";
+        ? recordName + " " + count + "개를 표시합니다."
+        : recordName +
+          "이 없습니다. 다른 상태를 고르거나 ‘전체 보기’를 눌러 보세요.";
   });
 });
 
