@@ -21,18 +21,21 @@ function handleSubscribe(event) {
 
   const subscriberEmail = emailInput.value.trim();
 
+  // 11주차: 브라우저 말풍선 대신 화면 문구 + aria-invalid + 입력칸 초점으로 오류를 알린다
   if (subscriberEmail === "") {
-    subscribeMessage.textContent = "이메일을 입력한 뒤 신청해주세요.";
-    subscribeMessage.classList.remove("is-success");
-    emailInput.focus();
+    showSubscribeError("이메일을 입력해 주세요. 예: runner@example.com");
     return;
   }
 
   if (!emailInput.checkValidity()) {
-    emailInput.reportValidity();
+    showSubscribeError(
+      "이메일 형식을 확인해 주세요. ‘@’와 도메인이 필요해요. 예: runner@example.com",
+    );
     return;
   }
 
+  emailInput.removeAttribute("aria-invalid");
+  subscribeMessage.classList.remove("is-error");
   isSubscribed = true;
   submitCount += 1;
 
@@ -45,6 +48,24 @@ function handleSubscribe(event) {
   subscribeButton.textContent = "신청 완료";
   subscribeButton.disabled = true;
 }
+
+function showSubscribeError(message) {
+  subscribeMessage.textContent = message;
+  subscribeMessage.classList.remove("is-success");
+  subscribeMessage.classList.add("is-error");
+  emailInput.setAttribute("aria-invalid", "true");
+  emailInput.focus();
+}
+
+// 오류가 난 뒤 다시 입력하면 형식이 맞는 순간 오류 표시를 걷어 낸다
+emailInput.addEventListener("input", () => {
+  if (emailInput.getAttribute("aria-invalid") !== "true") return;
+  if (emailInput.value.trim() === "" || !emailInput.checkValidity()) return;
+
+  emailInput.removeAttribute("aria-invalid");
+  subscribeMessage.classList.remove("is-error");
+  subscribeMessage.textContent = "올바른 이메일 형식이에요. 신청 버튼을 눌러 주세요.";
+});
 
 subscribeForm.addEventListener("submit", handleSubscribe);
 
@@ -70,7 +91,7 @@ function handleUserNameInput(event) {
   }
 
   const currentLength = Math.min(userNameInput.value.length, 10);
-  userNameCount.textContent = currentLength + " / 10";
+  userNameCount.textContent = currentLength + " / 10자";
 }
 
 function handleAgreeChange() {
@@ -190,10 +211,16 @@ function showRunningStep(index) {
   const activeProgress = runningSteps[index].dataset.progress;
 
   progressItems.forEach((item) => {
-    item.classList.toggle(
-      "is-active",
-      item.dataset.progress === activeProgress,
-    );
+    const isCurrent = item.dataset.progress === activeProgress;
+
+    item.classList.toggle("is-active", isCurrent);
+
+    // 11주차: 색뿐 아니라 코드에도 현재 단계를 알린다
+    if (isCurrent) {
+      item.setAttribute("aria-current", "step");
+    } else {
+      item.removeAttribute("aria-current");
+    }
   });
 
   currentRunningStep = index;
@@ -532,6 +559,7 @@ const playerOpenButton = document.querySelector("#player-open-button");
 
 const readySessionTitle = document.querySelector("#ready-session-title");
 const readyTotalTime = document.querySelector("#ready-total-time");
+const readyDemoTime = document.querySelector("#ready-demo-time");
 const readyBreakCount = document.querySelector("#ready-break-count");
 const readySegmentCount = document.querySelector("#ready-segment-count");
 const readyAdjustMessage = document.querySelector("#ready-adjust-message");
@@ -542,6 +570,7 @@ const voiceOptionHelp = document.querySelector("#voice-option-help");
 const vibrateOption = document.querySelector("#vibrate-option");
 const vibrateOptionHelp = document.querySelector("#vibrate-option-help");
 const speedOption = document.querySelector("#speed-option");
+const speedTimeNote = document.querySelector("#speed-time-note");
 
 const playerReadyPrev = document.querySelector("#player-ready-prev");
 const playerStartButton = document.querySelector("#player-start-button");
@@ -554,6 +583,7 @@ const playerRemainingCaption = document.querySelector(
   "#player-remaining-caption",
 );
 const playerNext = document.querySelector("#player-next");
+const playerSpeedNote = document.querySelector("#player-speed-note");
 const playerStatus = document.querySelector("#player-status");
 const playerOverallText = document.querySelector("#player-overall-text");
 const playerOverallBar = document.querySelector("#player-overall-bar");
@@ -578,6 +608,8 @@ const resultDescription = document.querySelector("#result-description");
 const resultStats = document.querySelector("#result-stats");
 const resultSessionTitle = document.querySelector("#result-session-title");
 const resultElapsed = document.querySelector("#result-elapsed");
+const resultDemoRow = document.querySelector("#result-demo-row");
+const resultDemoElapsed = document.querySelector("#result-demo-elapsed");
 const resultRunElapsed = document.querySelector("#result-run-elapsed");
 const resultCompleted = document.querySelector("#result-completed");
 const resultSkipped = document.querySelector("#result-skipped");
@@ -603,6 +635,7 @@ const player = {
   segmentElapsed: 0,
   totalElapsed: 0,
   runElapsed: 0,
+  demoElapsed: 0,
   lastTick: 0,
   completed: 0,
   skipped: 0,
@@ -810,6 +843,7 @@ function resetPlayer() {
   player.segmentElapsed = 0;
   player.totalElapsed = 0;
   player.runElapsed = 0;
+  player.demoElapsed = 0;
   player.lastTick = 0;
   player.completed = 0;
   player.skipped = 0;
@@ -834,6 +868,7 @@ function openReadyScreen() {
         ? plan.breaks + "회 (1회 1분)"
         : plan.breaks + "회 (요청 " + plan.requestedBreaks + "회에서 조정)";
   readySegmentCount.textContent = plan.segments.length + "개";
+  updateSpeedNote();
 
   readyAdjustMessage.textContent = plan.adjustMessage;
   readyAdjustMessage.hidden = plan.adjustMessage === "";
@@ -842,6 +877,52 @@ function openReadyScreen() {
   showRunningStep(READY_STEP);
   playerStartButton.focus();
 }
+
+// 11주차(10주차 코멘트 반영): 배속·휴식을 바꿔도 실제 운동 시간과 화면 시연 시간을 구분해 보여 준다
+function updateSpeedNote() {
+  const plan = player.plan;
+
+  if (!plan) return;
+
+  const speed = Number(speedOption.value);
+  const demoSeconds = Math.round(plan.totalSeconds / speed);
+  const restText =
+    plan.breaks > 0 ? "걷기 휴식 " + plan.breaks + "회 포함" : "휴식 없음";
+
+  if (speed === 1) {
+    readyDemoTime.textContent = plan.duration + "분 (실제 시간과 같음)";
+    speedTimeNote.textContent =
+      "1배는 실제 시간 그대로 진행해요. 실제 운동 " +
+      plan.duration +
+      "분(" +
+      restText +
+      ")이 화면에서도 " +
+      plan.duration +
+      "분 걸려요.";
+    playerSpeedNote.hidden = true;
+    playerSpeedNote.textContent = "";
+    return;
+  }
+
+  readyDemoTime.textContent =
+    "약 " + formatKoreanTime(demoSeconds) + " (" + speed + "배 시연)";
+  speedTimeNote.textContent =
+    "실제 운동 " +
+    plan.duration +
+    "분(" +
+    restText +
+    ")을 화면에서는 약 " +
+    formatKoreanTime(demoSeconds) +
+    " 만에 보여 줘요. 남은 시간 숫자는 실제 운동 시간 기준이에요.";
+  playerSpeedNote.hidden = false;
+  playerSpeedNote.textContent =
+    speed +
+    "배 시연 중 · 남은 시간은 실제 운동 시간 기준이에요. 화면에서는 약 " +
+    formatKoreanTime(demoSeconds) +
+    " 만에 끝나요.";
+}
+
+speedOption.addEventListener("change", updateSpeedNote);
 
 // 진행 화면 버튼 표시를 상태에 맞춘다
 function updateControls() {
@@ -983,6 +1064,7 @@ function tick() {
 
     player.segmentElapsed += step;
     player.totalElapsed += step;
+    player.demoElapsed += step / Number(speedOption.value);
     if (segment.kind === "run") player.runElapsed += step;
     leftDelta -= step;
 
@@ -1102,11 +1184,18 @@ function endSession(result) {
   resultSkipped.textContent = player.skipped + "개";
   resultRate.textContent = rate + "%";
 
-  resultSpeedNote.hidden = result === "empty" || speed === 1;
+  const isDemo = speed !== 1;
+  resultDemoRow.hidden = !isDemo;
+  resultDemoElapsed.textContent =
+    "약 " + formatKoreanTime(Math.round(player.demoElapsed / 1000));
+
+  resultSpeedNote.hidden = result === "empty" || !isDemo;
   resultSpeedNote.textContent =
     "시연 배속 " +
     speed +
-    "배로 진행한 세션 시간이에요. 거리·페이스는 측정하지 않아요.";
+    "배로 진행했어요. 위의 진행 시간은 실제로 달렸다면 걸렸을 운동 시간이고, 화면에서는 약 " +
+    formatKoreanTime(Math.round(player.demoElapsed / 1000)) +
+    "가 걸렸어요. 거리·페이스는 측정하지 않아요.";
 
   if (result === "finished") {
     resultBadge.textContent = "완주";
@@ -1276,6 +1365,11 @@ function updateCurrentNav() {
       link.removeAttribute("aria-current");
     }
   });
+
+  // 11주차: 현재 메뉴 이름을 브라우저 탭 제목에도 반영한다
+  const currentLink = document.querySelector('.main-nav a[aria-current="page"]');
+  const pageName = currentLink ? currentLink.textContent.trim() : "서비스 소개";
+  document.title = pageName + " | " + serviceName;
 }
 
 window.addEventListener("hashchange", updateCurrentNav);
@@ -1310,7 +1404,6 @@ document.addEventListener("keydown", (event) => {
 const RECORDS_KEY = "runmate-sessions";
 const recordsList = document.querySelector("#records-list");
 const recordsEmpty = document.querySelector("#records-empty");
-const recordsStatus = document.querySelector("#records-status");
 const recordsCount = document.querySelector("#records-count");
 const recordsMessage = document.querySelector("#records-message");
 const filterButtons = document.querySelectorAll(".filter-button");
@@ -1416,6 +1509,11 @@ function createRecordCard(session) {
   viewButton.setAttribute("aria-expanded", String(isOpen));
   viewButton.setAttribute("aria-controls", detailId);
   viewButton.textContent = isOpen ? "내용 접기" : "내용 보기";
+  // 11주차: 카드마다 같은 버튼 문구라 어느 세션인지 이름에 붙인다
+  viewButton.setAttribute(
+    "aria-label",
+    "‘" + (session.title || "이름 없는 세션") + "’ " + viewButton.textContent,
+  );
   actions.append(viewButton);
 
   if (!cancelled) {
@@ -1425,6 +1523,10 @@ function createRecordCard(session) {
     cancelButton.dataset.action = "cancel";
     cancelButton.dataset.id = session.id;
     cancelButton.textContent = "설정 취소하기";
+    cancelButton.setAttribute(
+      "aria-label",
+      "‘" + (session.title || "이름 없는 세션") + "’ 설정 취소하기",
+    );
     actions.append(cancelButton);
   }
 
@@ -1452,9 +1554,13 @@ function renderRecords() {
       ? "선택한 상태의 러닝 설정이 없어요."
       : "아직 저장한 러닝 설정이 없어요.";
     emptyDescription.textContent = filtered
-      ? "다른 상태를 선택해 보세요."
+      ? "다른 상태를 선택하거나 전체 기록을 다시 확인해 보세요."
       : "러닝 세션을 설정하고 저장하면 이곳에서 다시 볼 수 있습니다.";
-    emptyAction.hidden = filtered;
+
+    // 11주차: 필터 결과만 없을 때는 ‘전체 보기’로 돌아갈 길을 보여 준다
+    emptyAction.hidden = false;
+    emptyAction.textContent = filtered ? "전체 보기" : "러닝 설정하러 가기";
+    emptyAction.href = filtered ? "#records" : "#interaction-practice";
   }
 
   recordsCount.textContent = String(visibleSessions.length);
@@ -1476,7 +1582,27 @@ filterButtons.forEach((button) => {
     });
 
     renderRecords();
+
+    // 11주차: 필터 결과 수와 결과 없음을 상태 문장(role="status")으로 알린다
+    const count = getVisibleSessions(getSessions()).length;
+    const filterName = button.textContent.trim();
+
+    recordsMessage.textContent =
+      count > 0
+        ? filterName + " 기록 " + count + "개를 표시합니다."
+        : filterName +
+          " 기록이 없습니다. 다른 상태를 고르거나 ‘전체 보기’를 눌러 보세요.";
   });
+});
+
+// 결과 없음의 ‘전체 보기’: 주소 이동 대신 전체 필터를 누르고 초점을 그 버튼에 둔다
+recordsEmpty.querySelector("a").addEventListener("click", (event) => {
+  if (currentFilter === "all") return;
+
+  event.preventDefault();
+  const allButton = document.querySelector('.filter-button[data-filter="all"]');
+  allButton.click();
+  allButton.focus();
 });
 
 recordsList.addEventListener("click", (event) => {
@@ -1520,8 +1646,15 @@ recordsList.addEventListener("click", (event) => {
     renderRecords();
     recordsMessage.textContent =
       "‘" + (target.title || "이름 없는 세션") + "’ 설정을 취소했습니다.";
-    recordsStatus.tabIndex = -1;
-    recordsStatus.focus();
+
+    // 11주차: 카드가 남아 있으면 그 카드의 버튼으로, 필터에서 사라지면 선택한 필터로 초점을 옮긴다
+    const nextButton = recordsList.querySelector(
+      'button[data-action="view"][data-id="' + CSS.escape(id) + '"]',
+    );
+    const selectedFilter = document.querySelector(
+      '.filter-button[aria-pressed="true"]',
+    );
+    (nextButton || selectedFilter).focus();
   }
 });
 

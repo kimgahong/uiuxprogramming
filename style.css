@@ -9,7 +9,7 @@
 
   --color-secondary: #638aa0;
   --color-secondary-soft: #e8eff3;
-  --color-secondary-text: #4e7389;
+  --color-secondary-text: #466a7f;
 
   --color-danger: #c87972;
   --color-danger-strong: #a9554e;
@@ -28,12 +28,13 @@
   --color-surface: #ffffff;
   --color-surface-muted: #e7ede8;
   --color-text: #293633;
-  --color-text-muted: #69736e;
+  --color-text-muted: #5d6762;
   --color-border: #dce3dd;
   --color-border-strong: #c5d0c8;
   --color-disabled-bg: #e3e8e4;
   --color-disabled-text: #87918c;
-  --color-focus: rgba(57, 121, 104, 0.35);
+  /* 11주차: 반투명(흰 배경 1.6:1) → 진한 그린 실선 */
+  --color-focus: #2f6558;
   --color-backdrop: rgba(30, 40, 37, 0.55);
 
   --shadow-card: 0 1px 2px rgba(41, 54, 51, 0.04),
@@ -83,7 +84,7 @@ body.dark {
   --color-border-strong: #4d5f57;
   --color-disabled-bg: #34423c;
   --color-disabled-text: #8a978f;
-  --color-focus: rgba(111, 184, 160, 0.45);
+  --color-focus: #9ad6c1;
   --color-backdrop: rgba(8, 12, 11, 0.7);
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -273,6 +274,14 @@ main > section > h2::before,
   outline-offset: 2px;
 }
 
+/* 11주차: 현재 메뉴는 색뿐 아니라 굵기와 밑줄로도 구분한다 */
+.main-nav a[aria-current="page"] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
 /* 메뉴 버튼은 600px 이하에서만 보인다 */
 .menu-toggle {
   display: none;
@@ -329,9 +338,39 @@ button:active {
 
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+a:focus-visible,
+[tabindex="-1"]:focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/* ===== 11주차: 본문 바로가기 =====
+   평소에는 화면 위로 숨기고, 키보드 초점이 오면 왼쪽 위에 보여 준다 */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 16px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.15s;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* 바로가기로 도착한 본문 영역 자체에는 외곽선을 그리지 않는다 (다음 Tab부터 표시) */
+main:focus {
+  outline: none;
 }
 
 /* 보조 버튼: 중립 바탕, 테두리로 위계를 낮춤 */
@@ -454,6 +493,21 @@ input[type="radio"] {
   flex: 0 0 auto;
 }
 
+/* 11주차: 이메일 오류는 빨간색 + ⚠ 기호 + 문장으로 알린다 */
+#subscribeMessage.is-error {
+  color: var(--color-danger-text);
+  font-weight: 700;
+}
+
+#subscribeMessage.is-error::before {
+  content: "⚠ ";
+}
+
+#email[aria-invalid="true"] {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-soft);
+}
+
 .notice-message {
   color: var(--color-secondary-text);
   background-color: var(--color-secondary-soft);
@@ -560,6 +614,14 @@ input[type="radio"] {
   background-color: var(--color-surface);
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(41, 54, 51, 0.12);
+}
+
+/* 11주차: 선택한 탭은 색뿐 아니라 굵기와 밑줄로도 구분한다 */
+.tab[aria-selected="true"] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
 }
 
 .panel {
@@ -711,6 +773,8 @@ form label {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
 }
 
 .running-flow .progress_item {
@@ -727,6 +791,13 @@ form label {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   font-weight: 700;
+}
+
+/* 11주차: 현재 단계는 채운 색 + 굵기 + 밑줄 */
+.running-flow .progress_item[aria-current="step"] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .running-flow .step > label,
@@ -1017,6 +1088,32 @@ form label {
   flex-wrap: wrap;
 }
 
+/* 11주차: 시연 배속을 고르면 실제 운동 시간과 화면 시간을 나눠 알려 준다 */
+.speed-time-note,
+.player-speed-note {
+  margin: 8px 0 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  color: var(--color-secondary-text);
+  background-color: var(--color-secondary-soft);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.speed-time-note::before,
+.player-speed-note::before {
+  content: "ⓘ ";
+}
+
+.player-speed-note {
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+.player-speed-note[hidden] {
+  display: none;
+}
+
 /* 진행 화면: 은은한 구간 배경 위에 남은 시간이 가장 먼저 보이게 */
 .player-stage {
   display: grid;
@@ -1258,6 +1355,13 @@ form label {
 
 .filter-button.is-active::before {
   content: "✓ ";
+}
+
+/* 11주차: 선택한 필터는 채운 색 + ✓ + 굵기 + 밑줄 */
+.filter-button[aria-pressed="true"] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 5px;
 }
 
 .records-status {
