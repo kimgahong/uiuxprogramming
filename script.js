@@ -1359,15 +1359,18 @@ function updateCurrentNav() {
 
     link.classList.toggle("is-current", current);
 
+    // 12주차: 한 페이지 안의 본문 위치라서 "page" 대신 "location"
     if (current) {
-      link.setAttribute("aria-current", "page");
+      link.setAttribute("aria-current", "location");
     } else {
       link.removeAttribute("aria-current");
     }
   });
 
   // 11주차: 현재 메뉴 이름을 브라우저 탭 제목에도 반영한다
-  const currentLink = document.querySelector('.main-nav a[aria-current="page"]');
+  const currentLink = document.querySelector(
+    '.main-nav a[aria-current="location"]',
+  );
   const pageName = currentLink ? currentLink.textContent.trim() : "서비스 소개";
   document.title = pageName + " | " + serviceName;
 }
@@ -1465,26 +1468,56 @@ function createSummaryRow(label, value) {
   return row;
 }
 
+function getSessionName(session) {
+  return session.title || "이름 없는 세션";
+}
+
+// 12주차: 카드 버튼 하나를 만드는 공통 함수 (문구·모양·행동·화면 낭독 이름)
+function createCardButton(session, action, text, className) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.dataset.action = action;
+  button.dataset.id = session.id;
+  button.textContent = text;
+  // 11주차: 카드마다 같은 버튼 문구라 어느 세션인지 이름에 붙인다
+  button.setAttribute("aria-label", "‘" + getSessionName(session) + "’ " + text);
+
+  return button;
+}
+
+// 12주차: 저장된 데이터 한 건(session)으로 카드 한 장(li)을 만든다
+// 같은 것: 카드 모양·버튼 크기 / 다른 것: 제목·날짜·설정 / 상태에 따라: 배지·버튼·클래스
 function createRecordCard(session) {
   const cancelled = session.cancelled === true;
   const isOpen = openRecordIds.has(session.id);
   const detailId = "record-detail-" + session.id;
 
   const card = document.createElement("li");
-  card.className = "record-card";
-  card.dataset.status = cancelled ? "cancelled" : "active";
+  card.className = cancelled ? "record-card is-cancelled" : "record-card";
 
   const badge = document.createElement("p");
   badge.className = "record-badge";
   badge.textContent = cancelled ? "취소됨" : "저장됨";
 
   const title = document.createElement("h3");
-  title.textContent = session.title || "이름 없는 세션";
+  title.textContent = getSessionName(session);
 
+  // 사람이 읽는 날짜는 글자로, 기계가 읽는 날짜는 datetime 속성(ISO 형식)으로
   const date = document.createElement("p");
   date.className = "record-date";
-  date.textContent = formatSavedDate(session.createdAt) + " 저장";
+  const savedAt = new Date(session.createdAt);
 
+  if (Number.isNaN(savedAt.getTime())) {
+    date.textContent = "날짜 정보 없음";
+  } else {
+    const time = document.createElement("time");
+    time.dateTime = savedAt.toISOString();
+    time.textContent = formatSavedDate(session.createdAt);
+    date.append(time, " 저장");
+  }
+
+  // 아코디언: ‘내용 보기’를 누르면 열리고 ‘내용 접기’를 누르면 닫힌다
   const detail = document.createElement("div");
   detail.id = detailId;
   detail.className = "summary-list record-detail";
@@ -1501,35 +1534,21 @@ function createRecordCard(session) {
   const actions = document.createElement("div");
   actions.className = "record-actions";
 
-  const viewButton = document.createElement("button");
-  viewButton.type = "button";
-  viewButton.className = "button-secondary";
-  viewButton.dataset.action = "view";
-  viewButton.dataset.id = session.id;
+  const viewButton = createCardButton(
+    session,
+    "view",
+    isOpen ? "내용 접기" : "내용 보기",
+    "button-secondary",
+  );
   viewButton.setAttribute("aria-expanded", String(isOpen));
   viewButton.setAttribute("aria-controls", detailId);
-  viewButton.textContent = isOpen ? "내용 접기" : "내용 보기";
-  // 11주차: 카드마다 같은 버튼 문구라 어느 세션인지 이름에 붙인다
-  viewButton.setAttribute(
-    "aria-label",
-    "‘" + (session.title || "이름 없는 세션") + "’ " + viewButton.textContent,
-  );
-  actions.append(viewButton);
 
-  if (!cancelled) {
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.className = "button-danger";
-    cancelButton.dataset.action = "cancel";
-    cancelButton.dataset.id = session.id;
-    cancelButton.textContent = "설정 취소하기";
-    cancelButton.setAttribute(
-      "aria-label",
-      "‘" + (session.title || "이름 없는 세션") + "’ 설정 취소하기",
-    );
-    actions.append(cancelButton);
-  }
+  // 상태 전환: 저장 → ‘설정 취소하기’, 취소 → ‘취소 되돌리기’
+  const toggleButton = cancelled
+    ? createCardButton(session, "toggle", "취소 되돌리기", "button-secondary")
+    : createCardButton(session, "toggle", "설정 취소하기", "button-danger");
 
+  actions.append(viewButton, toggleButton);
   card.append(badge, title, date, detail, actions);
 
   return card;
@@ -1632,34 +1651,46 @@ recordsList.addEventListener("click", (event) => {
     return;
   }
 
-  if (button.dataset.action === "cancel") {
-    const sessions = getSessions();
-    const target = sessions.find((session) => session.id === id);
+  // 12주차: 다른 행동 버튼이 늘어나도 취소 상태는 toggle 버튼만 바꾼다
+  if (button.dataset.action !== "toggle") return;
 
-    if (!target) return;
+  const sessions = getSessions();
+  const target = sessions.find((session) => session.id === id);
 
-    target.cancelled = true;
+  if (!target) return;
+
+  const wasCancelled = target.cancelled === true;
+  target.cancelled = !wasCancelled;
+
+  if (target.cancelled) {
     target.cancelledAt = new Date().toISOString();
-
-    if (!saveSessions(sessions)) {
-      recordsMessage.textContent =
-        "설정을 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.";
-      return;
-    }
-
-    renderRecords();
-    recordsMessage.textContent =
-      "‘" + (target.title || "이름 없는 세션") + "’ 설정을 취소했습니다.";
-
-    // 11주차: 카드가 남아 있으면 그 카드의 버튼으로, 필터에서 사라지면 선택한 필터로 초점을 옮긴다
-    const nextButton = recordsList.querySelector(
-      'button[data-action="view"][data-id="' + CSS.escape(id) + '"]',
-    );
-    const selectedFilter = document.querySelector(
-      '.filter-button[aria-pressed="true"]',
-    );
-    (nextButton || selectedFilter).focus();
+  } else {
+    delete target.cancelledAt;
   }
+
+  if (!saveSessions(sessions)) {
+    recordsMessage.textContent = wasCancelled
+      ? "취소를 되돌리지 못했습니다. 잠시 후 다시 시도해 주세요."
+      : "설정을 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    return;
+  }
+
+  renderRecords();
+  recordsMessage.textContent =
+    "‘" +
+    getSessionName(target) +
+    (wasCancelled
+      ? "’ 설정을 다시 저장 상태로 되돌렸습니다."
+      : "’ 설정을 취소했습니다.");
+
+  // 11주차: 카드가 남아 있으면 그 카드의 버튼으로, 필터에서 사라지면 선택한 필터로 초점을 옮긴다
+  const nextButton = recordsList.querySelector(
+    'button[data-action="toggle"][data-id="' + CSS.escape(id) + '"]',
+  );
+  const selectedFilter = document.querySelector(
+    '.filter-button[aria-pressed="true"]',
+  );
+  (nextButton || selectedFilter).focus();
 });
 
 renderRecords();

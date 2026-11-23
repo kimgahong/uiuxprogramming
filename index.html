@@ -21,6 +21,11 @@
       <h1>맞춤형 <span class="accent-run">러닝</span> 코치</h1>
       <p>나에게 맞는 러닝 계획으로 꾸준히 달리고 목표를 달성해보세요.</p>
 
+      <!-- 12주차: 자주 쓰는 행동 링크 (901px 이상 왼쪽 메뉴에서만 보임) -->
+      <a class="sidebar-cta" href="#interaction-practice">
+        <span aria-hidden="true">＋</span> 새 러닝 설정
+      </a>
+
       <button
         id="menu-toggle"
         class="menu-toggle button-secondary"
@@ -313,21 +318,22 @@
 
           <fieldset id="break-options" hidden>
             <legend>걷기 휴식 횟수</legend>
+            <div class="choice-group">
+              <label class="choice-card">
+                <input type="radio" name="break-count" value="1" disabled />
+                <span>1회</span>
+              </label>
 
-            <label>
-              <input type="radio" name="break-count" value="1" disabled />
-              1회
-            </label>
+              <label class="choice-card">
+                <input type="radio" name="break-count" value="2" checked disabled />
+                <span>2회</span>
+              </label>
 
-            <label>
-              <input type="radio" name="break-count" value="2" checked disabled />
-              2회
-            </label>
-
-            <label>
-              <input type="radio" name="break-count" value="3" disabled />
-              3회
-            </label>
+              <label class="choice-card">
+                <input type="radio" name="break-count" value="3" disabled />
+                <span>3회</span>
+              </label>
+            </div>
           </fieldset>
 
           <div class="step-actions">
