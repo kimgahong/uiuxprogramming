@@ -37,6 +37,13 @@
   --color-focus: #2f6558;
   --color-backdrop: rgba(30, 40, 37, 0.55);
 
+  /* 12주차: 넓은 화면(901px 이상) 왼쪽 메뉴 색 */
+  --color-nav-bg: #1f3a33;
+  --color-nav-text: #e4efe9;
+  --color-nav-hover: #2c4d44;
+  --color-nav-current-bg: #36604f;
+  --color-nav-current-line: #b6e8cf;
+
   --shadow-card: 0 1px 2px rgba(41, 54, 51, 0.04),
     0 6px 20px rgba(41, 54, 51, 0.05);
   --shadow-dialog: 0 18px 48px rgba(30, 40, 37, 0.22);
@@ -86,6 +93,12 @@ body.dark {
   --color-disabled-text: #8a978f;
   --color-focus: #9ad6c1;
   --color-backdrop: rgba(8, 12, 11, 0.7);
+
+  --color-nav-bg: #15201c;
+  --color-nav-text: #dfeae4;
+  --color-nav-hover: #22332d;
+  --color-nav-current-bg: #2d4a40;
+  --color-nav-current-line: #9ad6c1;
 
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-dialog: 0 18px 48px rgba(0, 0, 0, 0.45);
@@ -274,8 +287,9 @@ main > section > h2::before,
   outline-offset: 2px;
 }
 
-/* 11주차: 현재 메뉴는 색뿐 아니라 굵기와 밑줄로도 구분한다 */
-.main-nav a[aria-current="page"] {
+/* 11주차: 현재 메뉴는 색뿐 아니라 굵기와 밑줄로도 구분한다
+   12주차: 한 페이지 안의 위치라서 aria-current="page" → "location" */
+.main-nav a[aria-current="location"] {
   font-weight: 800;
   text-decoration: underline;
   text-decoration-thickness: 2px;
@@ -867,11 +881,71 @@ form label {
   font-weight: 700;
 }
 
-.running-flow #break-options label {
-  display: inline-flex;
+/* ===== 12주차: 선택 카드 (휴식 횟수) =====
+   함께 쓰는 것: 크기·테두리·모서리 / 항목마다 다른 것: 1회·2회·3회 글자
+   행동에 따라 바뀌는 것: :checked(선택 표시)와 :focus-visible(초점선)을 따로 보여 준다 */
+.choice-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.choice-card {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+/* 동그라미는 숨기지만 키보드·화면 낭독기에서는 그대로 라디오로 동작한다 */
+.choice-card input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.choice-card span {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  margin-right: 20px;
+  justify-content: center;
+  min-height: var(--button-height);
+  padding: 0 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  font-weight: 700;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.choice-card:hover span {
+  border-color: var(--color-primary);
+}
+
+.choice-card input:checked + span {
+  border-color: var(--color-primary);
+  color: var(--color-primary-text);
+  background-color: var(--color-primary-soft);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+/* 색만으로 구분하지 않도록 선택한 칸에는 ✓를 붙인다 */
+.choice-card input:checked + span::before {
+  content: "✓ ";
+  white-space: pre;
+}
+
+.choice-card input:focus-visible + span {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.choice-card input:disabled + span {
+  color: var(--color-disabled-text);
+  background-color: var(--color-disabled-bg);
+  cursor: not-allowed;
 }
 
 .running-flow .summary-list > div {
@@ -1332,7 +1406,7 @@ form label {
 
 .filter-button {
   width: auto;
-  min-height: 42px;
+  min-height: var(--button-height);
   padding: 0 18px;
   border-color: var(--color-border-strong);
   border-radius: var(--radius-pill);
@@ -1447,7 +1521,7 @@ form label {
   box-shadow: var(--shadow-card);
 }
 
-.record-card[data-status="cancelled"] {
+.record-card.is-cancelled {
   border-left-color: var(--color-danger);
 }
 
@@ -1466,12 +1540,12 @@ form label {
   content: "✓ ";
 }
 
-.record-card[data-status="cancelled"] .record-badge {
+.record-card.is-cancelled .record-badge {
   color: var(--color-danger-text);
   background-color: var(--color-danger-soft);
 }
 
-.record-card[data-status="cancelled"] .record-badge::before {
+.record-card.is-cancelled .record-badge::before {
   content: "✕ ";
 }
 
@@ -1481,7 +1555,7 @@ form label {
   overflow-wrap: anywhere;
 }
 
-.record-card[data-status="cancelled"] h3 {
+.record-card.is-cancelled h3 {
   color: var(--color-text-muted);
 }
 
@@ -1518,7 +1592,7 @@ form label {
 
 .record-actions button {
   width: auto;
-  min-height: 44px;
+  min-height: var(--button-height);
   padding: 0 16px;
 }
 
@@ -1638,8 +1712,9 @@ form label {
   }
 }
 
-/* 모바일: 600px 이하에서는 메뉴를 버튼으로 열고 닫는다 */
-@media (max-width: 600px) {
+/* 12주차: 900px 이하(601~900px 태블릿 + 600px 이하 모바일)에서는
+   같은 메뉴 링크를 ‘메뉴 열기/닫기’ 버튼으로 접고 편다 (10주차에는 600px 이하만) */
+@media (max-width: 900px) {
   .menu-toggle {
     display: inline-flex;
     align-items: center;
@@ -1668,15 +1743,21 @@ form label {
     padding: 10px 14px;
     border-radius: var(--radius-sm);
   }
+}
 
+/* 12주차: 700px 이하에서는 기록 카드를 한 줄에 한 장씩 놓아 제목과 버튼 너비를 넓힌다 */
+@media (max-width: 700px) {
+  .records-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 모바일: 600px 이하 */
+@media (max-width: 600px) {
   .filter-button {
     flex: 1 1 0;
     width: auto;
     padding: 0 10px;
-  }
-
-  .records-list {
-    grid-template-columns: 1fr;
   }
 
   .record-card {
@@ -1686,5 +1767,109 @@ form label {
   .record-actions button {
     flex: 1 1 0;
     width: auto;
+  }
+}
+
+/* ===== 12주차: 반응형 탐색 컴포넌트 =====
+   같은 메뉴 링크(#about, #interaction-practice, #records)를 화면 폭에 따라 다르게 놓는다
+   - 901px 이상: 왼쪽 250px 고정 메뉴
+   - 900px 이하: 위쪽 ‘메뉴 열기’ 버튼으로 접고 편다 (위 @media (max-width: 900px)) */
+.sidebar-cta {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  body {
+    padding-left: 250px;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    max-width: none;
+    margin: 0;
+    padding: 32px 18px 24px;
+    overflow-y: auto;
+    color: var(--color-nav-text);
+    background-color: var(--color-nav-bg);
+  }
+
+  header h1 {
+    margin-bottom: 10px;
+    color: #ffffff;
+    font-size: 26px;
+  }
+
+  header h1 .accent-run {
+    color: var(--color-nav-current-line);
+  }
+
+  header p {
+    color: var(--color-nav-text);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .sidebar-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: var(--button-height);
+    margin: 24px 0 20px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    color: var(--color-nav-bg);
+    background-color: var(--color-nav-current-line);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .sidebar-cta:hover {
+    background-color: #ffffff;
+  }
+
+  .main-nav {
+    width: 100%;
+    margin: 0;
+  }
+
+  .main-nav ul {
+    display: grid;
+    gap: 6px;
+  }
+
+  .main-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--color-nav-text);
+  }
+
+  .main-nav a:hover {
+    color: #ffffff;
+    background-color: var(--color-nav-hover);
+  }
+
+  /* 현재 메뉴: 진한 바탕 + 왼쪽 연한 그린 세로선 + 굵은 글자 (밑줄 대신) */
+  .main-nav a.is-current,
+  .main-nav a[aria-current="location"] {
+    color: #ffffff;
+    background-color: var(--color-nav-current-bg);
+    box-shadow: inset 4px 0 0 var(--color-nav-current-line);
+    text-decoration: none;
+  }
+
+  /* 진한 바탕 위에서도 보이도록 메뉴 영역의 초점선은 밝은 색 */
+  header a:focus-visible {
+    outline-color: var(--color-nav-current-line);
   }
 }
