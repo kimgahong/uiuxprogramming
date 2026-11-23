@@ -15,6 +15,8 @@
   </head>
 
   <body>
+    <a class="skip-link" href="#main-content">본문 바로가기</a>
+
     <header>
       <h1>맞춤형 <span class="accent-run">러닝</span> 코치</h1>
       <p>나에게 맞는 러닝 계획으로 꾸준히 달리고 목표를 달성해보세요.</p>
@@ -38,14 +40,16 @@
       </nav>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <section id="about">
         <h2>서비스 소개</h2>
         <h3>나에게 맞는 러닝 계획을 시작하세요</h3>
 
         <img
           src="assets/images/service.png"
-          alt="러닝 코치를 통해 개인 맞춤형 러닝 계획을 확인하는 사용자"
+          alt="도로 위를 함께 달리는 마라톤 참가자 여러 명을 위에서 내려다본 사진"
+          width="830"
+          height="554"
         />
 
         <p>
@@ -167,8 +171,9 @@
             type="text"
             maxlength="10"
             placeholder="10자 이내로 입력"
+            aria-describedby="userNameCount"
           />
-          <p id="userNameCount" aria-live="polite">0 / 10</p>
+          <p id="userNameCount">0 / 10자</p>
         </div>
 
         <div class="interaction-item">
@@ -215,12 +220,12 @@
       <section id="running-flow" class="running-flow" hidden>
         <h2>러닝 세션 설정</h2>
 
-        <p class="progress" aria-label="설정 진행 단계">
-          <span class="progress_item" data-progress="1">1 · 정보</span>
-          <span class="progress_item" data-progress="2">2 · 조건</span>
-          <span class="progress_item" data-progress="3">3 · 확인</span>
-          <span class="progress_item" data-progress="4">4 · 러닝</span>
-        </p>
+        <ol class="progress" aria-label="설정 진행 단계">
+          <li class="progress_item" data-progress="1">1 · 정보</li>
+          <li class="progress_item" data-progress="2">2 · 조건</li>
+          <li class="progress_item" data-progress="3">3 · 확인</li>
+          <li class="progress_item" data-progress="4">4 · 러닝</li>
+        </ol>
 
         <form id="session-form" novalidate aria-busy="false">
         <section class="step" data-step="1" data-progress="1" hidden>
@@ -246,7 +251,7 @@
               <p id="session-title-help">
                 세션을 구분할 수 있도록 2자 이상 입력해 주세요.
               </p>
-              <p id="session-title-count" aria-live="polite">0 / 20자</p>
+              <p id="session-title-count">0 / 20자</p>
             </div>
 
             <p
@@ -404,8 +409,12 @@
 
           <div class="summary-list">
             <div>
-              <span>총 운동 시간</span>
+              <span>실제 운동 시간</span>
               <strong id="ready-total-time"></strong>
+            </div>
+            <div>
+              <span>화면 시연 시간</span>
+              <strong id="ready-demo-time"></strong>
             </div>
             <div>
               <span>걷기 휴식</span>
@@ -450,12 +459,15 @@
                 <strong>시연 배속</strong>
                 <small>발표·테스트할 때 세션을 빠르게 진행해요.</small>
               </span>
-              <select id="speed-option">
+              <select id="speed-option" aria-describedby="speed-time-note">
                 <option value="1" selected>1배 (실제 시간)</option>
                 <option value="10">10배</option>
                 <option value="60">60배</option>
               </select>
             </label>
+
+            <!-- 11주차: 실제 운동 시간과 화면 시연 시간을 나눠 보여 준다 -->
+            <p id="speed-time-note" class="speed-time-note" aria-live="polite"></p>
           </fieldset>
 
           <div class="step-actions">
@@ -487,6 +499,8 @@
 
             <p id="player-next" class="next-segment"></p>
           </div>
+
+          <p id="player-speed-note" class="player-speed-note" hidden></p>
 
           <p id="player-status" class="player-status" aria-live="polite"></p>
 
@@ -529,8 +543,12 @@
                 <strong id="result-session-title"></strong>
               </div>
               <div>
-                <span>세션 진행 시간</span>
+                <span>세션 진행 시간 (실제 운동 시간 기준)</span>
                 <strong id="result-elapsed"></strong>
+              </div>
+              <div id="result-demo-row" hidden>
+                <span>화면에서 걸린 시연 시간</span>
+                <strong id="result-demo-elapsed"></strong>
               </div>
               <div>
                 <span>달리기 진행 시간</span>
@@ -640,9 +658,17 @@
       <section id="subscribe" class="subscribe-card">
         <h2>러닝 소식 받기</h2>
 
-        <form id="subscribe-form">
+        <form id="subscribe-form" novalidate>
           <label for="email">이메일</label>
-          <input type="email" id="email" name="email" required />
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="예: runner@example.com"
+            aria-describedby="subscribeMessage"
+          />
           <button id="subscribeButton" type="submit">러닝 소식 신청하기</button>
         </form>
 
